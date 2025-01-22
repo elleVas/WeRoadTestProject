@@ -13,7 +13,6 @@ export class TravelsResolver {
     const travels = await this.travelsService.findAll();
     console.log(travels);
     return travels.map((travel) => {
-      // Se necessario, assicurati che la data venga serializzata correttamente
       if (travel.startingDate) {
         travel.startingDate = new Date(travel.startingDate);
       } else if (travel.endingDate) {

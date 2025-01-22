@@ -41,6 +41,7 @@ const seedData = async () => {
         culture: 30,
         party: 10,
       },
+      iata:"AMM"
     },
     {
       id: '7b5e7a1f-b7de-4f74-918d-68e77b9280fe',
@@ -59,6 +60,7 @@ const seedData = async () => {
         culture: 30,
         party: 40,
       },
+      iata:"BKK"
     },
     {
       id: '6b1a4320-abe7-44d5-b1d5-9148d25e5ed9',
@@ -77,6 +79,7 @@ const seedData = async () => {
         culture: 30,
         party: 50,
       },
+      iata:"SNG"
     },
     {
       id: 'd85dba24-2a1d-4f7e-8194-df84c12f777b',
@@ -95,6 +98,7 @@ const seedData = async () => {
         culture: 20,
         party: 10,
       },
+      iata:"RKV"
     },
     {
       id: '8b65e10e-b52f-4291-8f0a-6e5e6d145e2f',
@@ -112,7 +116,9 @@ const seedData = async () => {
         culture: 80,
         party: 70,
       },
+      iata:"DBX"
     },
+    
   ];
 
   try {

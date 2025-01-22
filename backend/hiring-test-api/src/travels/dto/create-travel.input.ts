@@ -45,4 +45,7 @@ export class CreateTravelInput {
 
   @Field()
   maxCapacity: number;
+
+ @Field()
+  iata: string;
 }

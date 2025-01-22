@@ -63,4 +63,8 @@ export class Travel {
   @Column('int')
   @Field()
   maxCapacity: number;
+
+  @Column()
+  @Field()
+  iata: string;
 }
