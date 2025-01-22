@@ -6,30 +6,38 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, defineProps, defineEmits } from 'vue';
 
-defineProps({
+
+const props = defineProps({
   expiryTime: {
     type: Date,
     required: true,
   },
 });
+// Evento emesso allo scadere
+const emit = defineEmits(['timeExpired']); 
 
 const timeLeft = ref(0);
 const minutes = ref('00');
 const seconds = ref('00');
 
+// Funzione di aggiornamento del tempo
 const updateTimeLeft = () => {
   const now = new Date().getTime();
-  timeLeft.value = Math.max(0, expiryTime.getTime() - now);
+  timeLeft.value = Math.max(0, props.expiryTime.getTime() - now);
 
-  if (timeLeft.value <= 0) return;
+  if (timeLeft.value <= 0) {
+    emit('timeExpired'); 
+    return;
+  }
 
   const totalSeconds = Math.floor(timeLeft.value / 1000);
   minutes.value = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
   seconds.value = String(totalSeconds % 60).padStart(2, '0');
 };
 
+// Inizializzazione e intervallo per aggiornare ogni secondo
 onMounted(() => {
   updateTimeLeft();
   const interval = setInterval(() => {
@@ -38,6 +46,3 @@ onMounted(() => {
   }, 1000);
 });
 </script>
-
-<style scoped>
-</style>

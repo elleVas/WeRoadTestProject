@@ -1,88 +1,100 @@
 <template>
-  <div class="p-4">
-    <h1 class="text-2xl font-bold mb-4">Checkout</h1>
-    <form @submit.prevent="confirmBooking" class="space-y-4">
-      <div>
-        <label for="email" class="block text-sm font-medium">Email</label>
-        <input
-          id="email"
-          v-model="email"
-          type="email"
-          class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
-          required
-        />
-      </div>
-      <div>
-        <label for="seats" class="block text-sm font-medium">Seats</label>
-        <input
-          id="seats"
-          v-model.number="seats"
-          type="number"
-          min="1"
-          max="travel?.maxCapacity"
-          class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
-          required
-        />
-      </div>
-      <div>
-        <p class="text-sm">Total: {{ seats * travel?.price }}€</p>
-      </div>
-      <button
-        type="submit"
-        class="bg-blue-500 text-white px-4 py-2 rounded-md shadow-sm"
-      >
-        Confirm and Pay
-      </button>
-    </form>
+  <div class="flex justify-center items-center min-h-screen bg-gray-100">
+    <div class="max-w-3xl w-full bg-gray-100 rounded-lg shadow-lg p-8">
+      <h1 class="text-3xl font-bold text-center mb-6">Checkout</h1>
+          <CartTimer :expiryTime="expiryTime"  @timeExpired="handleTimeExpired"/>
+
+      <form @submit.prevent="confirmBooking" class="space-y-6">
+        <div>
+          <label for="email" class="block text-lg font-medium text-gray-700">Email</label>
+          <input
+            id="email"
+            v-model="email"
+            type="email"
+            class="mt-2 block w-full border-gray-600 rounded-md shadow-sm p-3"
+            required
+          />
+        </div>
+        <div>
+          <label for="seats" class="block text-lg font-medium text-gray-700">Seats</label>
+          <input
+            id="seats"
+            v-model.number="seats"
+            type="number"
+            min="1"
+            :max="travel?.maxCapacity"
+            class="mt-2 block w-full border-gray-600 rounded-md shadow-sm p-3"
+            required
+          />
+        </div>
+        <div>
+          <p class="text-lg font-semibold text-gray-800">Total: {{ totalPrice }}€</p>
+        </div>
+        <div class="flex justify-center">
+          <button
+          :disabled="isTimeExpired"
+            type="submit"
+            class="bg-blue-600 text-white px-6 py-3 rounded-md shadow-md hover:bg-blue-700 transition-all duration-200"
+          >
+            Confirm and Pay
+          </button>
+        </div>
+      </form>
+  
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { gql } from '@apollo/client/core';
 import { useNuxtApp, useRoute } from '#app';
-
+import { GET_TRAVEL } from '@/plugins/graphql/queries';
+import { CREATE_BOOKING } from '@/plugins/graphql/mutations';
 const route = useRoute();
 const travelId = route.query.travelId;
 
 const email = ref('');
+const expiryTime = ref(new Date(new Date().getTime() + 15 * 60000));
+const isTimeExpired = ref(false);
 const seats = ref(1);
+const totalPrice = ref(0);
 const travel = ref(null);
 const { $apollo } = useNuxtApp();
 
-const FETCH_TRAVEL = gql`
-  query GetTravel($id: ID!) {
-    travel(id: $id) {
-      id
-      name
-      price
-      maxCapacity
-    }
-  }
-`;
-
-const CREATE_BOOKING = gql`
-  mutation CreateBooking($input: CreateBookingInput!) {
-    createBooking(createBookingInput: $input) {
-      id
-    }
-  }
-`;
 
 onMounted(async () => {
   const { data } = await $apollo.query({
-    query: FETCH_TRAVEL,
+    query: GET_TRAVEL,
     variables: { id: travelId },
   });
   travel.value = data.travel;
+  calculateTotalPrice();
 });
+
+// Funzione per calcolare il totale
+const calculateTotalPrice = () => {
+  if (travel.value) {
+    totalPrice.value = seats.value * travel.value.price;
+  }
+};
+
+// Watcher per calcolare il totale ogni volta che cambiano i posti
+watch(seats, () => {
+  calculateTotalPrice();
+});
+
+// Funzione per gestire l'evento quando il tempo scade
+const handleTimeExpired = () => {
+  isTimeExpired.value = true;
+};
 
 const confirmBooking = async () => {
   const input = {
     email: email.value,
     seats: seats.value,
     travelId: travelId,
-    paymentStatus: 'PAID', // Fake payment status
+    paymentStatus: 'PAID'
   };
 
   await $apollo.mutate({
@@ -94,3 +106,4 @@ const confirmBooking = async () => {
   navigateTo('/');
 };
 </script>
+

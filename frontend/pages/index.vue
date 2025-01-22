@@ -14,28 +14,16 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { gql } from '@apollo/client/core';
 import { useNuxtApp } from '#app';
-
+import { GET_TRAVELS } from '@/plugins/graphql/queries';
 const travels = ref([]);
 
-const FETCH_TRAVELS = gql`
-  query GetTravels {
-    travels {
-      id
-      name
-      description
-      price
-      maxCapacity
-      iata
-    }
-  }
-`;
+
 
 onMounted(async () => {
   const { $apollo } = useNuxtApp();
   if ($apollo) {
-    const { data } = await $apollo.query({ query: FETCH_TRAVELS });
+    const { data } = await $apollo.query({ query: GET_TRAVELS });
     travels.value = data.travels;
   } else {
     console.error('$apollo non è definito!');

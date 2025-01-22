@@ -31,6 +31,7 @@
 <script setup lang="ts">
 // Definisci l'interfaccia per la prop 'travel'
 interface Travel {
+  id:string;
   name: string;
   description: string;
   price: number;
@@ -46,8 +47,16 @@ const props = defineProps<{
 const emit = defineEmits();
 
 // Funzione per gestire la selezione
+/*const onSelectTravel = () => {
+  emit('select', props.travel);
+};*/
+
+
+const router = useRouter();
+
 const onSelectTravel = () => {
-  emit('select', props.travel); // Usa props.travel per accedere alla prop 'travel'
+  // Passa l'ID del viaggio alla pagina di booking tramite il router
+  router.push({ path: '/checkout', query: { travelId: props.travel.id } });
 };
 
 // Funzione per ottenere il percorso dell'immagine
