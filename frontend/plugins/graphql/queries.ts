@@ -1,7 +1,7 @@
 import { gql } from '@apollo/client/core';
 
 export const GET_TRAVEL = gql`
-  query GetTravel($id: ID!) {
+  query GetTravel($id: String!) {
     travel(id: $id) {
       id
       name
