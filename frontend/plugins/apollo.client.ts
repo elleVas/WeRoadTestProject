@@ -1,31 +1,15 @@
-/*import { ApolloClient, InMemoryCache } from '@apollo/client/core';
-
-export default defineNuxtPlugin(() => {
-  const apolloClient = new ApolloClient({
-    uri: 'http://localhost:3017/graphql',
-    cache: new InMemoryCache(),
-  });
-
-  return {
-    provide: {
-      apollo: apolloClient,
-    },
-  };
-});*/
-
-
-
-import { defineNuxtPlugin } from '#app';
+import { defineNuxtPlugin, useRuntimeConfig } from '#app';
 import { ApolloClient, InMemoryCache } from '@apollo/client/core';
 
 export default defineNuxtPlugin((nuxtApp) => {
-  console.log('Apollo Client Plugin Loaded'); // Debug: verifica che venga eseguito
+
+  //runtime config access to env var
+  const config = useRuntimeConfig();
   const apolloClient = new ApolloClient({
-    uri: 'http://localhost:3017/graphql', // Modifica con il tuo endpoint GraphQL
+    uri: config.public.apiUrl,
     cache: new InMemoryCache(),
   });
 
-  // Aggiungi il client Apollo al contesto dell'app
   nuxtApp.provide('apollo', apolloClient);
 });
 

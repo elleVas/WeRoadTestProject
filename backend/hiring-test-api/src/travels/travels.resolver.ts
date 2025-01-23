@@ -11,7 +11,6 @@ export class TravelsResolver {
   @Query(() => [Travel])
   async travels(): Promise<Travel[]> {
     const travels = await this.travelsService.findAll();
-    console.log(travels);
     return travels.map((travel) => {
       if (travel.startingDate) {
         travel.startingDate = new Date(travel.startingDate);

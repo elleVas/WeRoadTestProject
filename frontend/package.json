@@ -3,14 +3,16 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "nuxt build",
-    "dev": "nuxt dev",
+    "build": "NODE_ENV=development nuxt build",
+    "dev": "NODE_ENV=development nuxt dev",
+    "start": "NODE_ENV=development nuxt start",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
     "@apollo/client": "^3.12.7",
+    "dotenv": "^16.4.7",
     "graphql": "^16.10.0",
     "nuxt": "^3.15.2",
     "vue": "latest",

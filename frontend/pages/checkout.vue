@@ -74,11 +74,9 @@ onMounted(async () => {
 
 // Funzione per calcolare il totale
 const calculateTotalPrice = () => {
-  console.log("SEI QUII CALCOLO TOTALE ",travel.value);
   if (travel.value) {
     totalPrice.value = seats.value * travel.value.price;
   }
-  console.log(totalPrice.value);
 };
 
 // Watcher per calcolare il totale ogni volta che cambiano i posti
