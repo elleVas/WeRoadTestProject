@@ -16,11 +16,8 @@
 import { ref, onMounted } from 'vue';
 import { useNuxtApp } from '#app';
 import { GET_TRAVELS } from '@/plugins/graphql/queries';
-  import { useRuntimeConfig } from '#app';
+
 const travels = ref([]);
-
-
-
 onMounted(async () => {
   const { $apollo } = useNuxtApp();
   if ($apollo) {

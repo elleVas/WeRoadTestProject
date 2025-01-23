@@ -1,3 +1,4 @@
+// src/bookings/dto/create-booking.input.ts
 import { InputType, Field } from '@nestjs/graphql';
 
 @InputType()
@@ -6,14 +7,9 @@ export class CreateBookingInput {
   email: string;
 
   @Field()
+  travelId: string;
+
+  @Field()
   seats: number;
-
-  @Field()
-  paymentStatus: string;
-
-  @Field()
-  expiresAt: Date | null;
-
-  @Field()
-  travelId: string; // ID del viaggio associato
 }
+

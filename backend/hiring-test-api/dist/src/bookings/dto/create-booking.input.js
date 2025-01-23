@@ -20,20 +20,12 @@ __decorate([
 ], CreateBookingInput.prototype, "email", void 0);
 __decorate([
     (0, graphql_1.Field)(),
-    __metadata("design:type", Number)
-], CreateBookingInput.prototype, "seats", void 0);
-__decorate([
-    (0, graphql_1.Field)(),
-    __metadata("design:type", String)
-], CreateBookingInput.prototype, "paymentStatus", void 0);
-__decorate([
-    (0, graphql_1.Field)(),
-    __metadata("design:type", Object)
-], CreateBookingInput.prototype, "expiresAt", void 0);
-__decorate([
-    (0, graphql_1.Field)(),
     __metadata("design:type", String)
 ], CreateBookingInput.prototype, "travelId", void 0);
+__decorate([
+    (0, graphql_1.Field)(),
+    __metadata("design:type", Number)
+], CreateBookingInput.prototype, "seats", void 0);
 exports.CreateBookingInput = CreateBookingInput = __decorate([
     (0, graphql_1.InputType)()
 ], CreateBookingInput);

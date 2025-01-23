@@ -45,6 +45,14 @@ export class BookingsService {
     return await this.bookingRepository.save(booking);
   }
 
+  async findTravelById(travelInput: Travel): Promise<Travel> {
+    const travel = await this.travelRepository.findOne({where: { id: travelInput.id }});
+    if (!travel) {
+      throw new Error(`Travel with id ${travel} not found`); // Lancia un errore se il viaggio non esiste
+    }
+    return travel;
+  }
+
   async confirmBookingWithPayment(id: string, fakeToken: string) {
     const booking = await this.bookingRepository.findOneBy({ id });
     if (!booking || booking.isConfirmed) {

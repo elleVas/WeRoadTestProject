@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Travel = void 0;
 const typeorm_1 = require("typeorm");
 const graphql_1 = require("@nestjs/graphql");
+const booking_entities_1 = require("../../bookings/entities/booking.entities");
 let Moods = class Moods {
 };
 __decorate([
@@ -97,6 +98,11 @@ __decorate([
     (0, graphql_1.Field)(),
     __metadata("design:type", String)
 ], Travel.prototype, "iata", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => [booking_entities_1.Booking]),
+    (0, typeorm_1.OneToMany)(() => booking_entities_1.Booking, (booking) => booking.travel),
+    __metadata("design:type", Array)
+], Travel.prototype, "bookings", void 0);
 exports.Travel = Travel = __decorate([
     (0, graphql_1.ObjectType)(),
     (0, typeorm_1.Entity)()

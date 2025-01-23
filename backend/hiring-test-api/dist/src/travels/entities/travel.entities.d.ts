@@ -1,3 +1,4 @@
+import { Booking } from '../../bookings/entities/booking.entities';
 declare class Moods {
     nature: number;
     relax: number;
@@ -17,5 +18,6 @@ export declare class Travel {
     moods?: Moods;
     maxCapacity: number;
     iata: string;
+    bookings: Booking[];
 }
 export {};

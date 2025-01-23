@@ -2,11 +2,13 @@
   <div class="flex justify-center items-center min-h-screen bg-gray-100">
     <div class="max-w-3xl w-full bg-gray-100 rounded-lg shadow-lg p-8">
       <h1 class="text-3xl font-bold text-center mb-6">Checkout</h1>
-          <CartTimer :expiryTime="expiryTime"  @timeExpired="handleTimeExpired"/>
+      <CartTimer :expiryTime="expiryTime" @timeExpired="handleTimeExpired" />
 
       <form @submit.prevent="confirmBooking" class="space-y-6">
         <div>
-          <label for="email" class="block text-lg font-medium text-gray-700">Email</label>
+          <label for="email" class="block text-lg font-medium text-gray-700"
+            >Email</label
+          >
           <input
             id="email"
             v-model="email"
@@ -16,7 +18,9 @@
           />
         </div>
         <div>
-          <label for="seats" class="block text-lg font-medium text-gray-700">Seats</label>
+          <label for="seats" class="block text-lg font-medium text-gray-700"
+            >Seats</label
+          >
           <input
             id="seats"
             v-model.number="seats"
@@ -28,11 +32,13 @@
           />
         </div>
         <div>
-          <p class="text-lg font-semibold text-gray-800">Total: {{ totalPrice }}€</p>
+          <p class="text-lg font-semibold text-gray-800">
+            Total: {{ totalPrice }}€
+          </p>
         </div>
         <div class="flex justify-center">
           <button
-          :disabled="isTimeExpired"
+            :disabled="isTimeExpired"
             type="submit"
             class="bg-blue-600 text-white px-6 py-3 rounded-md shadow-md hover:bg-blue-700 transition-all duration-200"
           >
@@ -40,28 +46,26 @@
           </button>
         </div>
       </form>
-  
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue';
-import { gql } from '@apollo/client/core';
-import { useNuxtApp, useRoute } from '#app';
-import { GET_TRAVEL } from '@/plugins/graphql/queries';
-import { CREATE_BOOKING } from '@/plugins/graphql/mutations';
+import { ref, onMounted, watch } from "vue";
+import { gql } from "@apollo/client/core";
+import { useNuxtApp, useRoute } from "#app";
+import { GET_TRAVEL } from "@/plugins/graphql/queries";
+import { CREATE_BOOKING } from "@/plugins/graphql/mutations";
 const route = useRoute();
 const travelId = route.query.travelId;
 
-const email = ref('');
+const email = ref("");
 const expiryTime = ref(new Date(new Date().getTime() + 15 * 60000));
 const isTimeExpired = ref(false);
 const seats = ref(1);
 const totalPrice = ref(0);
 const travel = ref(null);
 const { $apollo } = useNuxtApp();
-
 
 onMounted(async () => {
   const { data } = await $apollo.query({
@@ -90,20 +94,22 @@ const handleTimeExpired = () => {
 };
 
 const confirmBooking = async () => {
-  const input = {
+  const createBookingInput = {
     email: email.value,
     seats: seats.value,
     travelId: travelId,
-    paymentStatus: 'PAID'
   };
+  try {
+    await $apollo.mutate({
+      mutation: CREATE_BOOKING,
+      variables: { createBookingInput },
+    });
+    console.log("Prenotazione creata:", data.createBooking);
+  } catch (error) {
+    console.error("Errore nella creazione della prenotazione:", error);
+  }
 
-  await $apollo.mutate({
-    mutation: CREATE_BOOKING,
-    variables: { input },
-  });
-
-  alert('Booking confirmed!');
-  navigateTo('/');
+  alert("Booking confirmed!");
+  navigateTo("/");
 };
 </script>
-

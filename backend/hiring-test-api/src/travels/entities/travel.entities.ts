@@ -1,6 +1,6 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { ObjectType, Field, Int, GraphQLISODateTime } from '@nestjs/graphql';
-
+import { Booking } from '../../bookings/entities/booking.entities';
 
 @ObjectType()
 class Moods {
@@ -45,7 +45,7 @@ export class Travel {
 
   @Column({ type: 'date' })
   endingDate: Date;
-//TODO FIX PROBLEM SERIALIZE GRAPHQL DATE idk why only on endingDate case study
+  //TODO FIX PROBLEM SERIALIZE GRAPHQL DATE idk why only on endingDate case study
   @Field(() => GraphQLISODateTime, { nullable: true })
   get formattedEndingDate(): Date | null {
     return this.endingDate ? new Date(this.endingDate) : null;
@@ -67,4 +67,8 @@ export class Travel {
   @Column()
   @Field()
   iata: string;
+
+  @Field(() => [Booking])
+  @OneToMany(() => Booking, (booking) => booking.travel)
+  bookings: Booking[];
 }

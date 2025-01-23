@@ -13,40 +13,52 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BookingsResolver = void 0;
-const common_1 = require("@nestjs/common");
-const typeorm_1 = require("@nestjs/typeorm");
-const typeorm_2 = require("typeorm");
+const graphql_1 = require("@nestjs/graphql");
+const bookings_service_1 = require("./bookings.service");
 const booking_entities_1 = require("./entities/booking.entities");
+const create_booking_input_1 = require("./dto/create-booking.input");
+const confirm_booking_input_1 = require("./dto/confirm-booking.input");
 const travel_entities_1 = require("../travels/entities/travel.entities");
 let BookingsResolver = class BookingsResolver {
-    constructor(bookingRepository, travelRepository) {
-        this.bookingRepository = bookingRepository;
-        this.travelRepository = travelRepository;
+    constructor(bookingsService) {
+        this.bookingsService = bookingsService;
     }
-    async findAll() {
-        return this.bookingRepository.find({ relations: ['travel'] });
+    async createBooking(createBookingInput) {
+        const { email, travelId, seats } = createBookingInput;
+        return await this.bookingsService.create(email, travelId, seats);
     }
-    async create(createBookingInput) {
-        const { travelId, ...bookingData } = createBookingInput;
-        const travel = await this.travelRepository.findOne({
-            where: { id: travelId },
-        });
-        if (!travel) {
-            throw new Error(`Travel with ID ${travelId} not found`);
-        }
-        const booking = this.bookingRepository.create({
-            ...bookingData,
-            travel,
-        });
-        return this.bookingRepository.save(booking);
+    async travel(booking) {
+        return this.bookingsService.findTravelById(booking.travel);
+    }
+    async confirmBooking(confirmBookingInput) {
+        const { id, fakeToken } = confirmBookingInput;
+        return await this.bookingsService.confirmBookingWithPayment(id, fakeToken);
     }
 };
 exports.BookingsResolver = BookingsResolver;
+__decorate([
+    (0, graphql_1.Mutation)(() => booking_entities_1.Booking),
+    __param(0, (0, graphql_1.Args)('createBookingInput')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [create_booking_input_1.CreateBookingInput]),
+    __metadata("design:returntype", Promise)
+], BookingsResolver.prototype, "createBooking", null);
+__decorate([
+    (0, graphql_1.ResolveField)(() => travel_entities_1.Travel),
+    __param(0, (0, graphql_1.Parent)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [booking_entities_1.Booking]),
+    __metadata("design:returntype", Promise)
+], BookingsResolver.prototype, "travel", null);
+__decorate([
+    (0, graphql_1.Mutation)(() => booking_entities_1.Booking),
+    __param(0, (0, graphql_1.Args)('confirmBookingInput')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [confirm_booking_input_1.ConfirmBookingInput]),
+    __metadata("design:returntype", Promise)
+], BookingsResolver.prototype, "confirmBooking", null);
 exports.BookingsResolver = BookingsResolver = __decorate([
-    (0, common_1.Injectable)(),
-    __param(0, (0, typeorm_1.InjectRepository)(booking_entities_1.Booking)),
-    __param(1, (0, typeorm_1.InjectRepository)(travel_entities_1.Travel)),
-    __metadata("design:paramtypes", [typeorm_2.Repository,
-        typeorm_2.Repository])
+    (0, graphql_1.Resolver)(() => booking_entities_1.Booking),
+    __metadata("design:paramtypes", [bookings_service_1.BookingsService])
 ], BookingsResolver);
 //# sourceMappingURL=bookings.resolver.js.map

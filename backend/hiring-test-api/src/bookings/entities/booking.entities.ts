@@ -1,5 +1,5 @@
 // src/bookings/entities/booking.entity.ts
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { ObjectType, Field } from '@nestjs/graphql';
 import { Travel } from '../../travels/entities/travel.entities';
 
@@ -21,12 +21,21 @@ export class Booking {
   @Column({ default: false })
   @Field()
   isConfirmed: boolean;
+
   @Column('timestamp', { nullable: true })
-  @Field((type) => Date, { nullable: true }) // Explicitly define the type here
+  @Field(() => Date, { nullable: true })
   expiresAt: Date | null;
 
-  @ManyToOne(() => Travel, (travel) => travel.id, { eager: true })
-  @Field()
+  /*
+  @Field(() => Travel)
+  @ManyToOne(() => Travel, (travel) => travel.bookings)
+  travel: Travel;*/
+
+  @ManyToOne(() => Travel, (travel) => travel.bookings, { eager: true })
+  @JoinColumn({ name: 'travelId' })
   travel: Travel;
-  booking: Booking;
+
+  @Column('uuid')
+  @Field()
+  travelId: string;
 }
