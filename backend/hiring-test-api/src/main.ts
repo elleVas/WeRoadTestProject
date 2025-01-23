@@ -1,14 +1,15 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as dotenv from 'dotenv';
+import { ConfigService } from '@nestjs/config';
 dotenv.config({ path: '.development.env' }); 
 
 async function bootstrap() {
 const app = await NestFactory.create(AppModule);
  // Abilita CORS
   app.enableCors({
-    origin: 'http://localhost:3000', 
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', 
+    origin: process.env.CORS_FRONTEND, 
+    methods: process.env.CORS_METHOD, 
     credentials: false,
   });
   

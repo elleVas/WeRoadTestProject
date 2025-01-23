@@ -12,11 +12,11 @@ export class BookingsResolver {
     private readonly bookingRepository: Repository<Booking>,
 
     @InjectRepository(Travel)
-    private readonly travelRepository: Repository<Travel>, // Per validare i viaggi
+    private readonly travelRepository: Repository<Travel>,
   ) {}
 
   async findAll(): Promise<Booking[]> {
-    return this.bookingRepository.find({ relations: ['travel'] }); // Include il viaggio associato
+    return this.bookingRepository.find({ relations: ['travel'] });
   }
 
   async create(createBookingInput: CreateBookingInput): Promise<Booking> {
