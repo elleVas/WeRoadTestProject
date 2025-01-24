@@ -24,6 +24,7 @@ let BookingsResolver = class BookingsResolver {
         this.bookingsService = bookingsService;
     }
     async createBooking(createBookingInput) {
+        console.log(createBookingInput);
         const { email, travelId, seats } = createBookingInput;
         return await this.bookingsService.create(email, travelId, seats);
     }

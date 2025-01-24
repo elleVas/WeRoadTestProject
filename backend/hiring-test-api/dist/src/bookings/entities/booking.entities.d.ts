@@ -6,5 +6,4 @@ export declare class Booking {
     isConfirmed: boolean;
     expiresAt: Date | null;
     travel: Travel;
-    travelId: string;
 }

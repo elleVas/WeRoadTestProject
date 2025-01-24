@@ -33,9 +33,6 @@ export class Booking {
 
   @ManyToOne(() => Travel, (travel) => travel.bookings, { eager: true })
   @JoinColumn({ name: 'travelId' })
+  @Field(() => Travel)
   travel: Travel;
-
-  @Column('uuid')
-  @Field()
-  travelId: string;
 }

@@ -18,23 +18,44 @@ export class BookingsService {
   ) {}
 
   async create(email: string, travelId: string, seats: number) {
+    // Recupera il viaggio
     const travel = await this.travelRepository.findOneBy({ id: travelId });
     if (!travel) {
       throw new Error('Travel not found');
     }
+    console.log('Travel trovato:', travel);
 
+    // Trova le prenotazioni attive per quel viaggio
     const activeBookings = await this.bookingRepository.find({
-      where: { travel, isConfirmed: false },
+      where: { travel: { id: travelId }, isConfirmed: false },
+      relations: ['travel'],
     });
 
-    const reservedSeats = activeBookings.reduce((sum, b) => sum + b.seats, 0);
+    console.log('Prenotazioni attive:', activeBookings);
+
+    // Calcola i posti già prenotati
+    const reservedSeats = activeBookings.reduce(
+      (sum, booking) => sum + booking.seats,
+      0,
+    );
+
+    // Verifica se ci sono posti sufficienti disponibili
     if (reservedSeats + seats > travel.maxCapacity) {
       throw new Error('Not enough available seats');
     }
 
+    // Sottrae i posti prenotati dalla disponibilità di posti
+    travel.maxCapacity -= seats;
+
+    // Salva l'aggiornamento del viaggio
+    await this.travelRepository.save(travel);
+    console.log('Viaggio aggiornato:', travel);
+
+    // Imposta la data di scadenza della prenotazione
     const expiresAt = new Date();
     expiresAt.setMinutes(expiresAt.getMinutes() + 15);
 
+    // Crea la prenotazione
     const booking = this.bookingRepository.create({
       email,
       seats,
@@ -42,13 +63,17 @@ export class BookingsService {
       travel,
     });
 
+    // Salva la prenotazione
     return await this.bookingRepository.save(booking);
   }
 
-  async findTravelById(travelInput: Travel): Promise<Travel> {
-    const travel = await this.travelRepository.findOne({where: { id: travelInput.id }});
+  async findTravelById(travelData: Travel): Promise<Travel> {
+    const travel = await this.travelRepository.findOne({
+      where: { id: travelData.id },
+    });
     if (!travel) {
-      throw new Error(`Travel with id ${travel} not found`); // Lancia un errore se il viaggio non esiste
+      //errore se il viaggio non esiste
+      throw new Error(`Travel with id ${travel} not found`);
     }
     return travel;
   }
@@ -67,9 +92,10 @@ export class BookingsService {
     if (!paymentResult.success) {
       throw new Error(paymentResult.message);
     }
-
-    booking.isConfirmed = true; // Confermiamo la prenotazione
-    booking.expiresAt = null; // Rimuoviamo l'expiration date dopo la conferma
+    // Conferma la prenotazione
+    booking.isConfirmed = true;
+    // Rimuove l'expiration date dopo la conferma
+    booking.expiresAt = null;
 
     return await this.bookingRepository.save(booking);
   }

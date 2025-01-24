@@ -24,13 +24,14 @@ export class BookingsResolver {
   async createBooking(
     @Args('createBookingInput') createBookingInput: CreateBookingInput,
   ): Promise<Booking> {
+    console.log(createBookingInput); // Verifica l'input
     const { email, travelId, seats } = createBookingInput;
     return await this.bookingsService.create(email, travelId, seats);
   }
   // Questa è la parte importante
   @ResolveField(() => Travel)
   async travel(@Parent() booking: Booking): Promise<Travel> {
-    // Assicurati di avere il metodo che carica il Travel
+    // Usa `booking.travelId` per trovare l'entità Travel
     return this.bookingsService.findTravelById(booking.travel);
   }
 

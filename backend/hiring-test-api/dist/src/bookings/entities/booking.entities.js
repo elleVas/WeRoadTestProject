@@ -44,13 +44,9 @@ __decorate([
 __decorate([
     (0, typeorm_1.ManyToOne)(() => travel_entities_1.Travel, (travel) => travel.bookings, { eager: true }),
     (0, typeorm_1.JoinColumn)({ name: 'travelId' }),
+    (0, graphql_1.Field)(() => travel_entities_1.Travel),
     __metadata("design:type", travel_entities_1.Travel)
 ], Booking.prototype, "travel", void 0);
-__decorate([
-    (0, typeorm_1.Column)('uuid'),
-    (0, graphql_1.Field)(),
-    __metadata("design:type", String)
-], Booking.prototype, "travelId", void 0);
 exports.Booking = Booking = __decorate([
     (0, graphql_1.ObjectType)(),
     (0, typeorm_1.Entity)()

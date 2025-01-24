@@ -8,7 +8,7 @@ export declare class BookingsService {
     private readonly travelRepository;
     constructor(bookingRepository: Repository<Booking>, paymentsService: PaymentsService, travelRepository: Repository<Travel>);
     create(email: string, travelId: string, seats: number): Promise<Booking>;
-    findTravelById(travelInput: Travel): Promise<Travel>;
+    findTravelById(travelData: Travel): Promise<Travel>;
     confirmBookingWithPayment(id: string, fakeToken: string): Promise<Booking>;
     cleanupExpiredBookings(): Promise<Booking[]>;
     cleanupExpiredBookingsTask(): Promise<void>;
