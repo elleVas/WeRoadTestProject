@@ -16,6 +16,7 @@ const bookings_module_1 = require("./bookings/bookings.module");
 const payments_module_1 = require("./payments/payments.module");
 const data_source_1 = require("./data.source");
 const config_1 = require("@nestjs/config");
+const schedule_1 = require("@nestjs/schedule");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -27,6 +28,7 @@ exports.AppModule = AppModule = __decorate([
                 driver: apollo_1.ApolloDriver,
                 autoSchemaFile: true,
             }),
+            schedule_1.ScheduleModule.forRoot(),
             typeorm_1.TypeOrmModule.forRoot(data_source_1.AppDataSource.options),
             travels_module_1.TravelsModule,
             bookings_module_1.BookingsModule,

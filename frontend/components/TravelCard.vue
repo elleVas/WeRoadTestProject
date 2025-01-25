@@ -29,15 +29,7 @@
 </template>
 
 <script setup lang="ts">
-// Definisci l'interfaccia per la prop 'travel'
-interface Travel {
-  id:string;
-  name: string;
-  description: string;
-  price: number;
-  maxCapacity: number;
-  iata: string;
-}
+import { Travel } from '../interfaces/interfaces';
 
 // Dichiara 'travel' come prop con il tipo definito
 const props = defineProps<{
@@ -45,13 +37,6 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits();
-
-// Funzione per gestire la selezione
-/*const onSelectTravel = () => {
-  emit('select', props.travel);
-};*/
-
-
 const router = useRouter();
 
 const onSelectTravel = () => {

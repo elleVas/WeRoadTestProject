@@ -41,12 +41,14 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue';
+import type { Moods } from '../interfaces/interfaces';
+
 
 const props = defineProps({
   moods: {
-    type: Object,
+    type: Object as () => Moods,
     required: true,
     default: () => ({}),
   },
@@ -55,37 +57,40 @@ const props = defineProps({
 // Trasforma l'oggetto in un array, escludendo __typename
 const moodsArray = computed(() => {
   const filteredMoods = { ...props.moods };
-  delete filteredMoods.__typename; // Escludi il campo __typename
+  delete filteredMoods.__typename;
 
   return Object.entries(filteredMoods).map(([key, value]) => ({
     label: key,
-    value: value,
-    color: getMoodColor(key),  // Aggiungi una funzione per assegnare i colori
-    icon: getMoodIcon(key),  // Aggiungi una funzione per assegnare le icone
+    value: parseInt(value),
+    color: getMoodColor(key),
+    icon: getMoodIcon(key),
   }));
 });
 
-function getMoodColor(mood) {
-  const colors = {
+// Funzione per ottenere il colore in base all'umore
+function getMoodColor(mood: string): string {
+  const colors: { [key: string]: string } = {
     nature: '#34D399',
     relax: '#60A5FA',
     history: '#FBBF24',
     culture: '#F87171',
     party: '#9333EA',
   };
-  return colors[mood] || '#E5E7EB'; // Colore di default
+  return colors[mood] || '#E5E7EB';
 }
 
-function getMoodIcon(mood) {
-  const icons = {
+// Funzione per ottenere l'icona in base all'umore
+function getMoodIcon(mood: string): string {
+  const icons: { [key: string]: string } = {
     nature: '/images/icons/nature.svg',
     relax: '/images/icons/relax.svg',
     history: '/images/icons/history.svg',
     culture: '/images/icons/culture.svg',
     party: '/images/icons/party.svg',
   };
-  return icons[mood] || '/icons/default.svg'; // Icona di default
+  return icons[mood] || '/icons/default.svg';
 }
 </script>
+
 
 

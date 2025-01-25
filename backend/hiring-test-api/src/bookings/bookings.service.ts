@@ -45,8 +45,8 @@ export class BookingsService {
     travel.maxCapacity -= seats;
 
     // Salva l'aggiornamento del viaggio per i posti disponibili si ferma a 0
-    if (travel.maxCapacity >=0){
-       await this.travelRepository.save(travel);
+    if (travel.maxCapacity >= 0) {
+      await this.travelRepository.save(travel);
     }
     // Imposta la data di scadenza della prenotazione
     const expiresAt = new Date();
@@ -99,11 +99,30 @@ export class BookingsService {
 
   async cleanupExpiredBookings() {
     const now = new Date();
-    const expired = await this.bookingRepository.find({
+
+    // Trova tutte le prenotazioni scadute e non confermate
+    const expiredBookings = await this.bookingRepository.find({
       where: { expiresAt: LessThanOrEqual(now), isConfirmed: false },
+      //carica il viaggio associato
+      relations: ['travel'],
     });
-    return await this.bookingRepository.remove(expired);
+
+    // Aggiorna i posti del viaggio per ogni prenotazione eliminata
+    for (const booking of expiredBookings) {
+      const travel = booking.travel;
+      const seatsToAdd = booking.seats;
+      // Aggiorna il campo 'seats' del viaggio
+      travel.maxCapacity += seatsToAdd;
+
+      // Salva il viaggio aggiornato
+      await this.travelRepository.save(travel);
+
+      // Ora rimuovi la prenotazione scaduta
+      await this.bookingRepository.remove(booking);
+    }
   }
+
+
 
   @Cron(CronExpression.EVERY_5_MINUTES)
   async cleanupExpiredBookingsTask() {

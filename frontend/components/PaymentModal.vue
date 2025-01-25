@@ -94,36 +94,48 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, watch, defineProps, defineEmits } from "vue";
 import { CONFIRM_BOOKING } from "@/plugins/graphql/mutations";
 
 const { $apollo } = useNuxtApp();
 
+// Definizione dei tipi per le props
+interface Props {
+  isOpenPayment: boolean;
+  totalPrice: number;
+  bookingID: string;
+}
+
 // Props ricevute dal componente padre
-const props = defineProps({
-  isOpenPayment: Boolean,
-  totalPrice: Number,
-});
+const props = defineProps<Props>();
 
 // Emitter per eventi al padre
-const emits = defineEmits(["update:isOpenPayment"]);
+const emits = defineEmits<{
+  (event: "update:isOpenPayment", value: boolean): void;
+}>();
 
 // Stato interno per gestire la visibilità della modale
-const internalValue = ref(props.isOpenPayment);
-const isTimeExpired = ref(false);
-const isLoading = ref(false);
-
+const internalValue = ref<boolean>(props.isOpenPayment);
+const bookingID = ref<string>(props.bookingID);
+const isTimeExpired = ref<boolean>(false);
+const isLoading = ref<boolean>(false);
+const dialogPayment = ref<boolean>(false);
 // Dettagli di pagamento
-const paymentDetails = ref({
+const paymentDetails = ref<{
+  cardNumber: string;
+  expirationDate: string;
+  cvv: string;
+}>({
   cardNumber: "",
   expirationDate: "",
   cvv: "",
 });
-const expiryTime = ref(new Date(new Date().getTime() + 15 * 60000));
+
+const expiryTime = ref<Date>(new Date(new Date().getTime() + 15 * 60000));
 
 // Funzione per chiudere la modale
-const closeModal = () => {
+const closeModal = (): void => {
   internalValue.value = false;
   paymentDetails.value = {
     cardNumber: "",
@@ -133,16 +145,16 @@ const closeModal = () => {
   emits("update:isOpenPayment", false);
 };
 
-const handleTimeExpired = () => {
+const handleTimeExpired = (): void => {
   isTimeExpired.value = true;
 };
 
 // Funzione per gestire il pagamento
-const handlePayment = async () => {
+const handlePayment = async (): Promise<void> => {
   if (!isTimeExpired.value) {
     const confirmBookingInput = {
-      id: email.value,
-      fake_token: "valid_token",
+      id: bookingID.value,
+      fakeToken: "valid_token",
     };
     //Imposta lo stato di caricamento
     isLoading.value = true;
@@ -158,23 +170,30 @@ const handlePayment = async () => {
       console.error("Errore nella creazione della prenotazione:", error);
     } finally {
       isLoading.value = false;
+      alert("Payment successful!");
+      navigateTo("/");
+      closeModal();
     }
-  
   }
-  alert("Payment successful!");
-  closeModal();
 };
 
 // Sincronizza lo stato interno con la prop ricevuta
 watch(
   () => props.isOpenPayment,
-  (newVal) => {
+  (newVal: boolean) => {
     internalValue.value = newVal;
+  }
+);
+watch(
+  () => props.bookingID,
+  (id: string) => {
+    bookingID.value = id;
   }
 );
 
 // Aggiorna la prop quando cambia lo stato interno
-watch(internalValue, (newVal) => {
+watch(internalValue, (newVal: boolean) => {
   emits("update:isOpenPayment", newVal);
 });
 </script>
+

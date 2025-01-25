@@ -10,6 +10,6 @@ export declare class BookingsService {
     create(email: string, travelId: string, seats: number): Promise<Booking>;
     findTravelById(travelData: Travel): Promise<Travel>;
     confirmBookingWithPayment(id: string, fakeToken: string): Promise<Booking>;
-    cleanupExpiredBookings(): Promise<Booking[]>;
+    cleanupExpiredBookings(): Promise<void>;
     cleanupExpiredBookingsTask(): Promise<void>;
 }

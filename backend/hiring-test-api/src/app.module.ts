@@ -7,8 +7,7 @@ import { BookingsModule } from './bookings/bookings.module';
 import { PaymentsModule } from './payments/payments.module';
 import { AppDataSource } from './data.source';
 import { ConfigModule } from '@nestjs/config';
-
-
+import { ScheduleModule } from '@nestjs/schedule';
 
 
 
@@ -20,6 +19,7 @@ import { ConfigModule } from '@nestjs/config';
       driver: ApolloDriver, // Specifica il driver Apollo
       autoSchemaFile: true,
     }),
+    ScheduleModule.forRoot(),
     // Usa la configurazione dal DataSource
     TypeOrmModule.forRoot(AppDataSource.options),
     TravelsModule,

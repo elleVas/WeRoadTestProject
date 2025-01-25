@@ -77,10 +77,17 @@ let BookingsService = class BookingsService {
     }
     async cleanupExpiredBookings() {
         const now = new Date();
-        const expired = await this.bookingRepository.find({
+        const expiredBookings = await this.bookingRepository.find({
             where: { expiresAt: (0, typeorm_2.LessThanOrEqual)(now), isConfirmed: false },
+            relations: ['travel'],
         });
-        return await this.bookingRepository.remove(expired);
+        for (const booking of expiredBookings) {
+            const travel = booking.travel;
+            const seatsToAdd = booking.seats;
+            travel.maxCapacity += seatsToAdd;
+            await this.travelRepository.save(travel);
+            await this.bookingRepository.remove(booking);
+        }
     }
     async cleanupExpiredBookingsTask() {
         await this.cleanupExpiredBookings();

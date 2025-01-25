@@ -86,32 +86,37 @@
   />
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, watch } from "vue";
 import { useNuxtApp, useRoute } from "#app";
 import { GET_TRAVEL } from "@/plugins/graphql/queries";
 import { CREATE_BOOKING } from "@/plugins/graphql/mutations";
 import MoodChart from "@/components/MoodsChart.vue";
 import PaymentModal from "@/components/PaymentModal.vue";
+import { Travel } from '../interfaces/interfaces';
 
 const route = useRoute();
-const travelId = route.query.travelId;
+const travelId = route.query.travelId as string;
 const dialogPayment = ref(false);
-const email = ref("");
-const bookingID = ref("");
+const email = ref<string>("");
+const bookingID = ref<string>("");
 
-const seats = ref(1);
-const totalPrice = ref(0);
-const travel = ref(null);
+const seats = ref<number>(1);
+const totalPrice = ref<number>(0);
+const travel = ref<Travel | null>(null);
 const { $apollo } = useNuxtApp();
 
 onMounted(async () => {
-  const { data } = await $apollo.query({
-    query: GET_TRAVEL,
-    variables: { id: travelId },
-  });
-  travel.value = data.travel;
-  calculateTotalPrice();
+  if (travelId) {
+    const { data } = await $apollo.query<{ travel: Travel }>({
+      query: GET_TRAVEL,
+      variables: { id: travelId },
+    });
+    travel.value = data.travel;
+    calculateTotalPrice();
+  } else {
+    console.error("Travel ID is missing in the route");
+  }
 });
 
 const calculateTotalPrice = () => {
@@ -125,13 +130,19 @@ watch(seats, () => {
 });
 
 const confirmBooking = async () => {
+  if (!email.value) {
+    console.error("Email is required");
+    return;
+  }
+
   const createBookingInput = {
     email: email.value,
     seats: seats.value,
     travelId: travelId,
   };
+
   try {
-    let res = await $apollo.mutate({
+    const res = await $apollo.mutate({
       mutation: CREATE_BOOKING,
       variables: { createBookingInput },
     });
@@ -146,3 +157,4 @@ const back = () => {
   navigateTo("/");
 };
 </script>
+
