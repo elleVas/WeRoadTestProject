@@ -31,6 +31,11 @@
           {{ travel?.description_extended }}
         </p>
         <br />
+        <strong>Dates:</strong> {{ formatDate(travel?.startingDate) }} →
+        {{ formatDate(travel?.endingDate) }}
+        <br />
+        <br />
+        <br />
         <MoodChart :moods="travel?.moods" />
       </div>
       <!-- Form -->
@@ -89,11 +94,13 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from "vue";
 import { useNuxtApp, useRoute } from "#app";
+import { format } from "date-fns";
+import { enUS } from "date-fns/locale";
 import { GET_TRAVEL } from "@/plugins/graphql/queries";
 import { CREATE_BOOKING } from "@/plugins/graphql/mutations";
 import MoodChart from "@/components/MoodsChart.vue";
 import PaymentModal from "@/components/PaymentModal.vue";
-import { Travel } from '../interfaces/interfaces';
+import { Travel } from "../interfaces/interfaces";
 
 const route = useRoute();
 const travelId = route.query.travelId as string;
@@ -153,8 +160,12 @@ const confirmBooking = async () => {
   }
 };
 
+const formatDate = (date: Date | undefined) => {
+  if (!date) date = new Date(); // Imposta la data corrente se non è definita
+  return format(date, "EEE, dd MMM yy", { locale: enUS });
+};
+
 const back = () => {
   navigateTo("/");
 };
 </script>
-
