@@ -11,6 +11,7 @@ export declare class Travel {
     slug: string;
     name: string;
     description: string;
+    description_extended: string;
     startingDate: Date;
     endingDate: Date;
     get formattedEndingDate(): Date | null;

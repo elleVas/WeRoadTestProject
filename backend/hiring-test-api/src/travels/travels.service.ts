@@ -13,7 +13,7 @@ export class TravelsService {
   ) {}
 
   findAll() {
-    return this.travelRepository.find();
+    return this.travelRepository.find({ order: { startingDate: 'ASC' } });
   }
 
   findOne(id: string) {

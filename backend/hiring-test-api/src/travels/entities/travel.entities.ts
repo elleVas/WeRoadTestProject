@@ -39,6 +39,10 @@ export class Travel {
   @Field()
   description: string;
 
+  @Column('text')
+  @Field()
+  description_extended: string;
+
   @Column({ type: 'date', nullable: true })
   @Field(() => GraphQLISODateTime, { nullable: true })
   startingDate: Date;

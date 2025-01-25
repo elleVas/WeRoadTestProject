@@ -31,19 +31,18 @@ let BookingsService = class BookingsService {
         if (!travel) {
             throw new Error('Travel not found');
         }
-        console.log('Travel trovato:', travel);
         const activeBookings = await this.bookingRepository.find({
             where: { travel: { id: travelId }, isConfirmed: false },
             relations: ['travel'],
         });
-        console.log('Prenotazioni attive:', activeBookings);
         const reservedSeats = activeBookings.reduce((sum, booking) => sum + booking.seats, 0);
-        if (reservedSeats + seats > travel.maxCapacity) {
+        if (seats > travel.maxCapacity) {
             throw new Error('Not enough available seats');
         }
         travel.maxCapacity -= seats;
-        await this.travelRepository.save(travel);
-        console.log('Viaggio aggiornato:', travel);
+        if (travel.maxCapacity >= 0) {
+            await this.travelRepository.save(travel);
+        }
         const expiresAt = new Date();
         expiresAt.setMinutes(expiresAt.getMinutes() + 15);
         const booking = this.bookingRepository.create({

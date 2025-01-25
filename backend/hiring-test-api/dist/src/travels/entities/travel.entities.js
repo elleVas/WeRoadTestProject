@@ -65,6 +65,11 @@ __decorate([
     __metadata("design:type", String)
 ], Travel.prototype, "description", void 0);
 __decorate([
+    (0, typeorm_1.Column)('text'),
+    (0, graphql_1.Field)(),
+    __metadata("design:type", String)
+], Travel.prototype, "description_extended", void 0);
+__decorate([
     (0, typeorm_1.Column)({ type: 'date', nullable: true }),
     (0, graphql_1.Field)(() => graphql_1.GraphQLISODateTime, { nullable: true }),
     __metadata("design:type", Date)

@@ -23,15 +23,12 @@ export class BookingsService {
     if (!travel) {
       throw new Error('Travel not found');
     }
-    console.log('Travel trovato:', travel);
 
     // Trova le prenotazioni attive per quel viaggio
     const activeBookings = await this.bookingRepository.find({
       where: { travel: { id: travelId }, isConfirmed: false },
       relations: ['travel'],
     });
-
-    console.log('Prenotazioni attive:', activeBookings);
 
     // Calcola i posti già prenotati
     const reservedSeats = activeBookings.reduce(
@@ -40,17 +37,17 @@ export class BookingsService {
     );
 
     // Verifica se ci sono posti sufficienti disponibili
-    if (reservedSeats + seats > travel.maxCapacity) {
+    if (seats > travel.maxCapacity) {
       throw new Error('Not enough available seats');
     }
 
     // Sottrae i posti prenotati dalla disponibilità di posti
     travel.maxCapacity -= seats;
 
-    // Salva l'aggiornamento del viaggio
-    await this.travelRepository.save(travel);
-    console.log('Viaggio aggiornato:', travel);
-
+    // Salva l'aggiornamento del viaggio per i posti disponibili si ferma a 0
+    if (travel.maxCapacity >=0){
+       await this.travelRepository.save(travel);
+    }
     // Imposta la data di scadenza della prenotazione
     const expiresAt = new Date();
     expiresAt.setMinutes(expiresAt.getMinutes() + 15);

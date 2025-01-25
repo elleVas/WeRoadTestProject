@@ -22,7 +22,7 @@ let TravelsService = class TravelsService {
         this.travelRepository = travelRepository;
     }
     findAll() {
-        return this.travelRepository.find();
+        return this.travelRepository.find({ order: { startingDate: 'ASC' } });
     }
     findOne(id) {
         return this.travelRepository.findOneBy({ id });
