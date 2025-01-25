@@ -1,6 +1,6 @@
 <template>
   <div class="p-6 bg-gray-100 min-h-screen">
-    <h1 class="text-3xl font-bold text-center mb-6">Travel with us.</h1>
+    <h1 class="text-3xl font-bold text-center mb-6">WeRoad takes you to discover the world.</h1>
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       <TravelCard
         v-for="travel in travels"

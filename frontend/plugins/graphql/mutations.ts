@@ -14,4 +14,18 @@ export const CREATE_BOOKING = gql`
       seats
     }
   }
+
+  mutation ConfirmBooking($confirmBookingInput: ConfirmBookingInput!) {
+    cconfirmBooking(confirmBookingInput: $confirmBookingInput) {
+      id
+      email
+      travel {
+        id
+        name
+        description
+        maxCapacity
+      }
+      seats
+    }
+  }
 `;

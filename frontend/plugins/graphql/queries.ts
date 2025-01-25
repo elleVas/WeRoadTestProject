@@ -5,11 +5,21 @@ export const GET_TRAVEL = gql`
     travel(id: $id) {
       id
       name
-      price
       description
+      description_extended
+      price
       maxCapacity
+      iata
+      moods{
+        nature,
+        relax,
+        history,
+        culture,
+        party
+        }
+      }
     }
-  }
+  
 `;
 
 export const GET_TRAVELS = gql`

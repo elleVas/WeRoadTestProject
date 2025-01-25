@@ -1,9 +1,39 @@
 <template>
   <div class="flex justify-center items-center min-h-screen bg-gray-100">
-    <div class="max-w-3xl w-full bg-gray-100 rounded-lg shadow-lg p-8">
-      <h1 class="text-3xl font-bold text-center mb-6">Checkout</h1>
-      <CartTimer :expiryTime="expiryTime" @timeExpired="handleTimeExpired" />
+    <div class="max-w-3xl w-full bg-gray-100 rounded-lg shadow-lg p-8 relative">
+      <!-- Pulsante Back -->
+      <button
+        @click="back"
+        class="absolute top-4 left-4 bg-red-500 text-white w-10 h-10 rounded-full flex items-center justify-center shadow-md hover:bg-red-600 transition-all duration-200"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="2"
+          stroke="currentColor"
+          class="w-7 h-7"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M6 18L18 6M6 6l12 12"
+          />
+        </svg>
+      </button>
 
+      <!-- Titolo -->
+      <h1 class="text-3xl font-bold text-center mb-6">Checkout</h1>
+
+      <!-- Immagine e Testo Travel -->
+      <div class="flex flex-col items-center mb-6">
+        <p class="mt-4 text-base text-gray-600 text-center">
+          {{ travel?.description_extended }}
+        </p>
+        <br />
+        <MoodChart :moods="travel?.moods" />
+      </div>
+      <!-- Form -->
       <form @submit.prevent="confirmBooking" class="space-y-6">
         <div>
           <label for="email" class="block text-lg font-medium text-gray-700"
@@ -38,7 +68,6 @@
         </div>
         <div class="flex justify-center">
           <button
-            :disabled="isTimeExpired"
             type="submit"
             class="bg-blue-600 text-white px-6 py-3 rounded-md shadow-md hover:bg-blue-700 transition-all duration-200"
           >
@@ -48,20 +77,29 @@
       </form>
     </div>
   </div>
+
+  <PaymentModal
+    :isOpenPayment="dialogPayment"
+    :totalPrice="totalPrice"
+    :bookingID="bookingID"
+    @update:isOpenPayment="dialogPayment = $event"
+  />
 </template>
 
 <script setup>
 import { ref, onMounted, watch } from "vue";
-import { gql } from "@apollo/client/core";
 import { useNuxtApp, useRoute } from "#app";
 import { GET_TRAVEL } from "@/plugins/graphql/queries";
 import { CREATE_BOOKING } from "@/plugins/graphql/mutations";
+import MoodChart from "@/components/MoodsChart.vue";
+import PaymentModal from "@/components/PaymentModal.vue";
+
 const route = useRoute();
 const travelId = route.query.travelId;
-
+const dialogPayment = ref(false);
 const email = ref("");
-const expiryTime = ref(new Date(new Date().getTime() + 15 * 60000));
-const isTimeExpired = ref(false);
+const bookingID = ref("");
+
 const seats = ref(1);
 const totalPrice = ref(0);
 const travel = ref(null);
@@ -76,22 +114,15 @@ onMounted(async () => {
   calculateTotalPrice();
 });
 
-// Funzione per calcolare il totale
 const calculateTotalPrice = () => {
   if (travel.value) {
     totalPrice.value = seats.value * travel.value.price;
   }
 };
 
-// Watcher per calcolare il totale ogni volta che cambiano i posti
 watch(seats, () => {
   calculateTotalPrice();
 });
-
-// Funzione per gestire l'evento quando il tempo scade
-const handleTimeExpired = () => {
-  isTimeExpired.value = true;
-};
 
 const confirmBooking = async () => {
   const createBookingInput = {
@@ -100,16 +131,18 @@ const confirmBooking = async () => {
     travelId: travelId,
   };
   try {
-    await $apollo.mutate({
+    let res = await $apollo.mutate({
       mutation: CREATE_BOOKING,
       variables: { createBookingInput },
     });
-    console.log("Prenotazione creata:", data.createBooking);
+    bookingID.value = res.data.createBooking.id;
+    dialogPayment.value = true;
   } catch (error) {
     console.error("Errore nella creazione della prenotazione:", error);
   }
+};
 
-  alert("Booking confirmed!");
+const back = () => {
   navigateTo("/");
 };
 </script>

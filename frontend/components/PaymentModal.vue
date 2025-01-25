@@ -1,0 +1,180 @@
+<template>
+  <div
+    v-if="internalValue"
+    class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+  >
+    <div class="bg-white rounded-lg p-6 w-96 shadow-lg">
+      <h2 class="text-xl font-bold mb-4">Payment Information</h2>
+      <CartTimer :expiryTime="expiryTime" @timeExpired="handleTimeExpired" />
+      <form @submit.prevent="handlePayment">
+        <div class="mb-4">
+          <label
+            for="cardNumber"
+            class="block text-sm font-medium text-gray-700"
+            >Card Number</label
+          >
+          <input
+            id="cardNumber"
+            type="text"
+            v-model="paymentDetails.cardNumber"
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            placeholder="1234 5678 9012 3456"
+          />
+        </div>
+
+        <div class="mb-4">
+          <label
+            for="expirationDate"
+            class="block text-sm font-medium text-gray-700"
+            >Expiration Date</label
+          >
+          <input
+            id="expirationDate"
+            type="text"
+            v-model="paymentDetails.expirationDate"
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            placeholder="MM/YY"
+          />
+        </div>
+
+        <div class="mb-4">
+          <label for="cvv" class="block text-sm font-medium text-gray-700"
+            >CVV</label
+          >
+          <input
+            id="cvv"
+            type="text"
+            v-model="paymentDetails.cvv"
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            placeholder="123"
+          />
+        </div>
+        <button
+          :disabled="isTimeExpired || isLoading"
+          type="submit"
+          class="w-full bg-blue-600 text-white px-6 py-3 rounded-md shadow-md hover:bg-blue-700 transition-all duration-200"
+          v-if="!isLoading"
+        >
+          Pay ${{ totalPrice }}
+        </button>
+
+        <div v-else class="w-full h-12 flex justify-center items-center">
+          <svg
+            class="animate-spin w-6 h-6 text-blue-600"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-opacity="0.2"
+            ></circle>
+            <path
+              d="M4 12a8 8 0 0 1 8-8V4M12 4v4M12 12h4"
+              stroke="currentColor"
+            ></path>
+          </svg>
+        </div>
+      </form>
+
+      <button
+        @click="closeModal"
+        class="mt-4 w-full text-gray-500 hover:text-gray-700 text-sm"
+      >
+        Cancel
+      </button>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, watch, defineProps, defineEmits } from "vue";
+import { CONFIRM_BOOKING } from "@/plugins/graphql/mutations";
+
+const { $apollo } = useNuxtApp();
+
+// Props ricevute dal componente padre
+const props = defineProps({
+  isOpenPayment: Boolean,
+  totalPrice: Number,
+});
+
+// Emitter per eventi al padre
+const emits = defineEmits(["update:isOpenPayment"]);
+
+// Stato interno per gestire la visibilità della modale
+const internalValue = ref(props.isOpenPayment);
+const isTimeExpired = ref(false);
+const isLoading = ref(false);
+
+// Dettagli di pagamento
+const paymentDetails = ref({
+  cardNumber: "",
+  expirationDate: "",
+  cvv: "",
+});
+const expiryTime = ref(new Date(new Date().getTime() + 15 * 60000));
+
+// Funzione per chiudere la modale
+const closeModal = () => {
+  internalValue.value = false;
+  paymentDetails.value = {
+    cardNumber: "",
+    expirationDate: "",
+    cvv: "",
+  };
+  emits("update:isOpenPayment", false);
+};
+
+const handleTimeExpired = () => {
+  isTimeExpired.value = true;
+};
+
+// Funzione per gestire il pagamento
+const handlePayment = async () => {
+  if (!isTimeExpired.value) {
+    const confirmBookingInput = {
+      id: email.value,
+      fake_token: "valid_token",
+    };
+    //Imposta lo stato di caricamento
+    isLoading.value = true;
+    //emette la chiamata di pagamento
+    try {
+      await $apollo.mutate({
+        mutation: CONFIRM_BOOKING,
+        variables: { confirmBookingInput },
+      });
+
+      dialogPayment.value = true;
+    } catch (error) {
+      console.error("Errore nella creazione della prenotazione:", error);
+    } finally {
+      isLoading.value = false;
+    }
+  
+  }
+  alert("Payment successful!");
+  closeModal();
+};
+
+// Sincronizza lo stato interno con la prop ricevuta
+watch(
+  () => props.isOpenPayment,
+  (newVal) => {
+    internalValue.value = newVal;
+  }
+);
+
+// Aggiorna la prop quando cambia lo stato interno
+watch(internalValue, (newVal) => {
+  emits("update:isOpenPayment", newVal);
+});
+</script>
