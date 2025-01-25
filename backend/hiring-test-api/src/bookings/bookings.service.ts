@@ -80,7 +80,10 @@ export class BookingsService {
     if (!booking || booking.isConfirmed) {
       throw new Error('Invalid booking');
     }
-
+    // Controlla se la prenotazione è scaduta
+    if (booking.expiresAt && booking.expiresAt < new Date()) {
+      throw new Error('Booking has expired');
+    }
     // Simula il pagamento
     const paymentResult = await this.paymentsService.processPayment(
       id,

@@ -67,6 +67,9 @@ let BookingsService = class BookingsService {
         if (!booking || booking.isConfirmed) {
             throw new Error('Invalid booking');
         }
+        if (booking.expiresAt && booking.expiresAt < new Date()) {
+            throw new Error('Booking has expired');
+        }
         const paymentResult = await this.paymentsService.processPayment(id, fakeToken);
         if (!paymentResult.success) {
             throw new Error(paymentResult.message);
