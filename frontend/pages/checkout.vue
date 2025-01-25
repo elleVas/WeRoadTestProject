@@ -69,7 +69,7 @@
         <div class="flex justify-center">
           <button
             type="submit"
-            class="bg-blue-600 text-white px-6 py-3 rounded-md shadow-md hover:bg-blue-700 transition-all duration-200"
+            class="bg-red-600 text-white px-6 py-3 rounded-md shadow-md hover:bg-red-700 transition-all duration-200"
           >
             Confirm and Pay
           </button>

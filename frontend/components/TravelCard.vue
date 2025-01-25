@@ -1,14 +1,17 @@
 <template>
   <div class="max-w-sm rounded overflow-hidden shadow-lg bg-white">
-<img
-  class="w-full h-48 object-cover"
-  :src="`/images/${travel.iata}.jpg`"
-  alt="Travel image"
-/>
+    <img
+      class="w-full h-48 object-cover"
+      :src="`/images/${travel.iata}.jpg`"
+      alt="Travel image"
+    />
     <div class="px-6 py-4">
       <div class="font-bold text-xl mb-2">{{ travel.name }}</div>
       <p class="text-gray-700 text-base">
         {{ travel.description }}
+      </p>
+      <p class="text-gray-700 text-sm mt-4">
+        <strong>Dates:</strong> {{ formatDate(travel.startingDate) }} → {{ formatDate(travel.endingDate) }}
       </p>
     </div>
     <div class="px-6 pt-4 pb-2">
@@ -19,7 +22,7 @@
         Max Capacity: {{ travel.maxCapacity }} {{ travel.iata }}
       </span>
       <button
-        class="mt-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        class="mt-2 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
         @click="onSelectTravel"
       >
         Book Now
@@ -30,6 +33,9 @@
 
 <script setup lang="ts">
 import { Travel } from '../interfaces/interfaces';
+import { format } from 'date-fns';
+import { enUS } from 'date-fns/locale';
+import { useRouter } from 'vue-router';
 
 // Dichiara 'travel' come prop con il tipo definito
 const props = defineProps<{
@@ -44,11 +50,12 @@ const onSelectTravel = () => {
   router.push({ path: '/checkout', query: { travelId: props.travel.id } });
 };
 
-// Funzione per ottenere il percorso dell'immagine
-const getImagePath = (iata: string) => {
-  return new URL(`~/assets/images/${iata}.jpg`, import.meta.url).href;
+const formatDate = (date: Date) => {
+  return format(new Date(date), 'EEE, dd MMM yy', { locale: enUS });
 };
+
 </script>
+
 
 
 

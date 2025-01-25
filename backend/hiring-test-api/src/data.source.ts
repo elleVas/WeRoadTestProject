@@ -1,8 +1,6 @@
 import { DataSource } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
-
 import * as dotenv from 'dotenv';
-import { Booking } from './bookings/entities/booking.entities';
 dotenv.config({ path: '.development.env' });
 
 const configService = new ConfigService();
@@ -22,3 +20,4 @@ export const AppDataSource = new DataSource({
   synchronize: false,
   logging: true,
 });
+

@@ -7,6 +7,8 @@ export const GET_TRAVEL = gql`
       name
       description
       description_extended
+      startingDate
+      endingDate
       price
       maxCapacity
       iata
@@ -28,6 +30,8 @@ export const GET_TRAVELS = gql`
       id
       name
       description
+      startingDate
+      endingDate
       price
       maxCapacity
       iata

@@ -20,6 +20,9 @@
             class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
             placeholder="1234 5678 9012 3456"
           />
+          <p v-if="errors.cardNumber" class="text-red-500 text-sm">
+            {{ errors.cardNumber }}
+          </p>
         </div>
 
         <div class="mb-4">
@@ -35,6 +38,9 @@
             class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
             placeholder="MM/YY"
           />
+          <p v-if="errors.expirationDate" class="text-red-500 text-sm">
+            {{ errors.expirationDate }}
+          </p>
         </div>
 
         <div class="mb-4">
@@ -48,7 +54,11 @@
             class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
             placeholder="123"
           />
+          <p v-if="errors.cvv" class="text-red-500 text-sm">
+            {{ errors.cvv }}
+          </p>
         </div>
+
         <button
           :disabled="isTimeExpired || isLoading"
           type="submit"
@@ -121,6 +131,7 @@ const bookingID = ref<string>(props.bookingID);
 const isTimeExpired = ref<boolean>(false);
 const isLoading = ref<boolean>(false);
 const dialogPayment = ref<boolean>(false);
+
 // Dettagli di pagamento
 const paymentDetails = ref<{
   cardNumber: string;
@@ -132,6 +143,13 @@ const paymentDetails = ref<{
   cvv: "",
 });
 
+// Errori di validazione
+const errors = ref<{
+  cardNumber?: string;
+  expirationDate?: string;
+  cvv?: string;
+}>({});
+
 const expiryTime = ref<Date>(new Date(new Date().getTime() + 15 * 60000));
 
 // Funzione per chiudere la modale
@@ -142,6 +160,7 @@ const closeModal = (): void => {
     expirationDate: "",
     cvv: "",
   };
+  errors.value = {};
   emits("update:isOpenPayment", false);
 };
 
@@ -149,31 +168,71 @@ const handleTimeExpired = (): void => {
   isTimeExpired.value = true;
 };
 
+// Funzione per validare i campi di pagamento
+const validatePaymentDetails = (): boolean => {
+  errors.value = {};
+
+  // Valida il numero della carta
+  if (!/^\d{16}$/.test(paymentDetails.value.cardNumber)) {
+    errors.value.cardNumber = "Card number must be 16 digits.";
+  }
+
+  // Valida la data di scadenza
+  if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(paymentDetails.value.expirationDate)) {
+    errors.value.expirationDate = "Expiration date must be in MM/YY format.";
+  } else {
+    const [month, year] = paymentDetails.value.expirationDate.split("/").map(Number);
+    const currentDate = new Date();
+    const expiryDate = new Date(
+      2000 + year,
+      month - 1,
+      1
+    );
+    if (expiryDate <= currentDate) {
+      errors.value.expirationDate = "Expiration date must be in the future.";
+    }
+  }
+
+  // Valida il CVV
+  if (!/^\d{3}$/.test(paymentDetails.value.cvv)) {
+    errors.value.cvv = "CVV must be 3 digits.";
+  }
+
+  return Object.keys(errors.value).length === 0;
+};
+
 // Funzione per gestire il pagamento
 const handlePayment = async (): Promise<void> => {
-  if (!isTimeExpired.value) {
-    const confirmBookingInput = {
-      id: bookingID.value,
-      fakeToken: "valid_token",
-    };
-    //Imposta lo stato di caricamento
-    isLoading.value = true;
-    //emette la chiamata di pagamento
-    try {
-      await $apollo.mutate({
-        mutation: CONFIRM_BOOKING,
-        variables: { confirmBookingInput },
-      });
+  if (isTimeExpired.value) {
+    return;
+  }
 
-      dialogPayment.value = true;
-    } catch (error) {
-      console.error("Errore nella creazione della prenotazione:", error);
-    } finally {
-      isLoading.value = false;
-      alert("Payment successful!");
-      navigateTo("/");
-      closeModal();
-    }
+  if (!validatePaymentDetails()) {
+    console.error("Validation errors:", errors.value);
+    return;
+  }
+
+  const confirmBookingInput = {
+    id: bookingID.value,
+    fakeToken: "valid_token",
+  };
+
+  // Imposta lo stato di caricamento
+  isLoading.value = true;
+
+  try {
+    await $apollo.mutate({
+      mutation: CONFIRM_BOOKING,
+      variables: { confirmBookingInput },
+    });
+
+    dialogPayment.value = true;
+  } catch (error) {
+    console.error("Errore nella creazione della prenotazione:", error);
+  } finally {
+    isLoading.value = false;
+    navigateTo("/bookingConfirmation")
+    closeModal();
   }
 };
 
@@ -196,4 +255,7 @@ watch(internalValue, (newVal: boolean) => {
   emits("update:isOpenPayment", newVal);
 });
 </script>
+
+
+
 

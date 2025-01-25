@@ -39,9 +39,6 @@ Moods = __decorate([
     (0, graphql_1.ObjectType)()
 ], Moods);
 let Travel = class Travel {
-    get formattedEndingDate() {
-        return this.endingDate ? new Date(this.endingDate) : null;
-    }
 };
 exports.Travel = Travel;
 __decorate([
@@ -70,19 +67,15 @@ __decorate([
     __metadata("design:type", String)
 ], Travel.prototype, "description_extended", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'date', nullable: true }),
-    (0, graphql_1.Field)(() => graphql_1.GraphQLISODateTime, { nullable: true }),
-    __metadata("design:type", Date)
+    (0, typeorm_1.Column)('timestamp', { nullable: true }),
+    (0, graphql_1.Field)(() => Date, { nullable: true }),
+    __metadata("design:type", Object)
 ], Travel.prototype, "startingDate", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'date' }),
-    __metadata("design:type", Date)
+    (0, typeorm_1.Column)('timestamp', { nullable: true }),
+    (0, graphql_1.Field)(() => Date, { nullable: true }),
+    __metadata("design:type", Object)
 ], Travel.prototype, "endingDate", void 0);
-__decorate([
-    (0, graphql_1.Field)(() => graphql_1.GraphQLISODateTime, { nullable: true }),
-    __metadata("design:type", Object),
-    __metadata("design:paramtypes", [])
-], Travel.prototype, "formattedEndingDate", null);
 __decorate([
     (0, typeorm_1.Column)('int'),
     (0, graphql_1.Field)(),

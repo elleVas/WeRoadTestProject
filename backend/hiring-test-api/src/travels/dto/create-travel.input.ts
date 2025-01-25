@@ -31,10 +31,10 @@ export class CreateTravelInput {
   description: string;
 
   @Field()
-  startDate: Date;
+  startingDate: Date;
 
   @Field()
-  endDate: Date;
+  endingDate: Date;
 
   @Field()
   price: number;
@@ -46,6 +46,6 @@ export class CreateTravelInput {
   @Field()
   maxCapacity: number;
 
- @Field()
+  @Field()
   iata: string;
 }

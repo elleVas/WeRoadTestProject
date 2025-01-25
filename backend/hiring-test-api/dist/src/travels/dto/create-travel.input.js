@@ -54,11 +54,11 @@ __decorate([
 __decorate([
     (0, graphql_1.Field)(),
     __metadata("design:type", Date)
-], CreateTravelInput.prototype, "startDate", void 0);
+], CreateTravelInput.prototype, "startingDate", void 0);
 __decorate([
     (0, graphql_1.Field)(),
     __metadata("design:type", Date)
-], CreateTravelInput.prototype, "endDate", void 0);
+], CreateTravelInput.prototype, "endingDate", void 0);
 __decorate([
     (0, graphql_1.Field)(),
     __metadata("design:type", Number)

@@ -12,9 +12,8 @@ export declare class Travel {
     name: string;
     description: string;
     description_extended: string;
-    startingDate: Date;
-    endingDate: Date;
-    get formattedEndingDate(): Date | null;
+    startingDate: Date | null;
+    endingDate: Date | null;
     price: number;
     moods?: Moods;
     maxCapacity: number;

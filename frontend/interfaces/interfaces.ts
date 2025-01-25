@@ -6,6 +6,8 @@ export interface Moods {
 export class Travel {
   id: string;
   name: string;
+  startingDate: Date;
+  endingDate: Date;
   description: string;
   price: number;
   description_extended: string;
@@ -15,6 +17,8 @@ export class Travel {
   constructor(
     id: string,
     name: string,
+    startingDate: Date,
+    endingDate: Date,
     description: string,
     price: number,
     description_extended: string,
@@ -24,10 +28,11 @@ export class Travel {
     this.id = id;
     this.name = name;
     this.description = description;
+    this.startingDate = startingDate;
+    this.endingDate = endingDate;
     this.price = price;
     this.description_extended = description_extended;
     this.moods = moods;
     this.maxCapacity = maxCapacity;
   }
-
 }

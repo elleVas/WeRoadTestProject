@@ -9,8 +9,8 @@ export declare class CreateTravelInput {
     slug: string;
     name: string;
     description: string;
-    startDate: Date;
-    endDate: Date;
+    startingDate: Date;
+    endingDate: Date;
     price: number;
     moods?: MoodsInput;
     maxCapacity: number;
