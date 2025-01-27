@@ -1,24 +1,31 @@
-/*import { Test, TestingModule } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 import { BookingsService } from './bookings.service';
 import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Booking } from './entities/booking.entities';
 import { Travel } from '../travels/entities/travel.entities';
+import { PaymentsService } from '../payments/payments.service';
 
-const mockBookingRepository = {
-  create: jest.fn(),
-  save: jest.fn(),
-  find: jest.fn(),
-};
-
-const mockTravelRepository = {
-  findOne: jest.fn(),
-};
+jest.mock('../payments/payments.service');
 
 describe('BookingsService', () => {
   let service: BookingsService;
   let bookingRepository: Repository<Booking>;
   let travelRepository: Repository<Travel>;
+  let paymentsService: PaymentsService;
+
+  const mockBookingRepository = {
+    create: jest.fn(),
+    save: jest.fn(),
+    find: jest.fn(),
+    findOneBy: jest.fn(),
+    remove: jest.fn(),
+  };
+
+  const mockTravelRepository = {
+    findOneBy: jest.fn(),
+    save: jest.fn(),
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -32,49 +39,150 @@ describe('BookingsService', () => {
           provide: getRepositoryToken(Travel),
           useValue: mockTravelRepository,
         },
+        PaymentsService,
       ],
     }).compile();
 
     service = module.get<BookingsService>(BookingsService);
-    bookingRepository = module.get<Repository<Booking>>(getRepositoryToken(Booking));
-    travelRepository = module.get<Repository<Travel>>(getRepositoryToken(Travel));
+    bookingRepository = module.get<Repository<Booking>>(
+      getRepositoryToken(Booking),
+    );
+    travelRepository = module.get<Repository<Travel>>(
+      getRepositoryToken(Travel),
+    );
+    paymentsService = module.get<PaymentsService>(PaymentsService);
   });
 
-  it('should create a booking successfully', async () => {
-    const travel = { id: '1', name: 'Sample Travel' } as Travel;
-    const bookingInput = {
-      email: 'test@example.com',
-      seats: 2,
-      travelId: '1',
-    };
-
-    jest.spyOn(travelRepository, 'findOne').mockResolvedValue(travel);
-    jest.spyOn(bookingRepository, 'create').mockImplementation((input) => input);
-    jest.spyOn(bookingRepository, 'save').mockResolvedValue({ id: '123', ...bookingInput });
-
-    const result = await service.create(bookingInput);
-
-    expect(result).toEqual({ id: '123', ...bookingInput });
-    expect(travelRepository.findOne).toHaveBeenCalledWith({ where: { id: '1' } });
-    expect(bookingRepository.create).toHaveBeenCalledWith({
-      email: 'test@example.com',
-      seats: 2,
-      travel: travel,
-    });
-    expect(bookingRepository.save).toHaveBeenCalled();
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
-  it('should throw an error if travel does not exist', async () => {
-    jest.spyOn(travelRepository, 'findOne').mockResolvedValue(null);
-
-    await expect(
-      service.create({
+  describe('create', () => {
+    it('should create a new booking if seats are available', async () => {
+      const travel = { id: 'travel-id', maxCapacity: 10 } as Travel;
+      const booking = {
+        id: 'booking-id',
         email: 'test@example.com',
         seats: 2,
-        travelId: '1',
-      }),
-    ).rejects.toThrow('Travel with ID 1 not found');
+      } as Booking;
 
-    expect(travelRepository.findOne).toHaveBeenCalledWith({ where: { id: '1' } });
+      mockTravelRepository.findOneBy.mockResolvedValue(travel);
+      mockBookingRepository.find.mockResolvedValue([]);
+      mockBookingRepository.create.mockReturnValue(booking);
+      mockBookingRepository.save.mockResolvedValue(booking);
+
+      const result = await service.create('test@example.com', 'travel-id', 2);
+
+      expect(mockTravelRepository.findOneBy).toHaveBeenCalledWith({
+        id: 'travel-id',
+      });
+      expect(mockBookingRepository.create).toHaveBeenCalledWith({
+        email: 'test@example.com',
+        seats: 2,
+        expiresAt: expect.any(Date),
+        travel,
+      });
+      expect(mockBookingRepository.save).toHaveBeenCalledWith(booking);
+      expect(result).toEqual(booking);
+    });
+
+    it('should throw an error if travel is not found', async () => {
+      mockTravelRepository.findOneBy.mockResolvedValue(null);
+
+      await expect(
+        service.create('test@example.com', 'invalid-id', 2),
+      ).rejects.toThrow('Travel not found');
+    });
+
+    it('should throw an error if not enough seats are available', async () => {
+      const travel = { id: 'travel-id', maxCapacity: 1 } as Travel;
+
+      mockTravelRepository.findOneBy.mockResolvedValue(travel);
+
+      await expect(
+        service.create('test@example.com', 'travel-id', 2),
+      ).rejects.toThrow('Not enough available seats');
+    });
   });
-});*/
+
+  describe('confirmBookingWithPayment', () => {
+    it('should confirm a booking if payment is successful', async () => {
+      const booking = {
+        id: 'booking-id',
+        isConfirmed: false,
+        expiresAt: new Date(Date.now() + 1000),
+      } as Booking;
+
+      mockBookingRepository.findOneBy.mockResolvedValue(booking);
+      jest
+        .spyOn(paymentsService, 'processPayment')
+        .mockResolvedValue({ success: true, message:"processPayment succesfull"});
+
+      const result = await service.confirmBookingWithPayment(
+        'booking-id',
+        'fake-token',
+      );
+
+      expect(paymentsService.processPayment).toHaveBeenCalledWith(
+        'booking-id',
+        'fake-token',
+      );
+      expect(mockBookingRepository.save).toHaveBeenCalledWith({
+        ...booking,
+        isConfirmed: true,
+        expiresAt: null,
+      });
+      expect(result).toEqual({
+        ...booking,
+        isConfirmed: true,
+        expiresAt: null,
+      });
+    });
+
+    it('should throw an error if booking is not found', async () => {
+      mockBookingRepository.findOneBy.mockResolvedValue(null);
+
+      await expect(
+        service.confirmBookingWithPayment('invalid-id', 'fake-token'),
+      ).rejects.toThrow('Invalid booking');
+    });
+
+    it('should throw an error if the booking has expired', async () => {
+      const booking = {
+        id: 'booking-id',
+        expiresAt: new Date(Date.now() - 1000),
+      } as Booking;
+
+      mockBookingRepository.findOneBy.mockResolvedValue(booking);
+
+      await expect(
+        service.confirmBookingWithPayment('booking-id', 'fake-token'),
+      ).rejects.toThrow('Booking has expired');
+    });
+  });
+
+  describe('cleanupExpiredBookings', () => {
+    it('should remove expired bookings and update travel capacity', async () => {
+      const travel = { id: 'travel-id', maxCapacity: 5 } as Travel;
+      const expiredBooking = { id: 'booking-id', seats: 2, travel } as Booking;
+
+      mockBookingRepository.find.mockResolvedValue([expiredBooking]);
+      mockTravelRepository.save.mockResolvedValue({
+        ...travel,
+        maxCapacity: 7,
+      });
+
+      await service.cleanupExpiredBookings();
+
+      expect(mockBookingRepository.find).toHaveBeenCalledWith({
+        where: { expiresAt: expect.any(Date), isConfirmed: false },
+        relations: ['travel'],
+      });
+      expect(mockTravelRepository.save).toHaveBeenCalledWith({
+        ...travel,
+        maxCapacity: 7,
+      });
+      expect(mockBookingRepository.remove).toHaveBeenCalledWith(expiredBooking);
+    });
+  });
+});

@@ -1,11 +1,11 @@
 <template>
-  <div class="flex space-x-8 items-center justify-center">
+  <div class="flex flex-wrap gap-8 items-center justify-center">
     <div
       v-for="mood in moodsArray"
       :key="mood.label"
-      class="flex flex-col items-center"
+      class="flex flex-col items-center w-1/3 sm:w-1/4 md:w-1/6"
     >
-      <div class="relative w-20 h-20">
+      <div class="relative w-16 h-16 sm:w-20 sm:h-20">
         <!-- Cerchio sfondo -->
         <svg class="w-full h-full" viewBox="0 0 36 36">
           <circle
@@ -31,15 +31,16 @@
         </svg>
         <!-- Icona al centro -->
         <div class="absolute inset-0 flex items-center justify-center">
-          <img :src="mood.icon" alt="Mood Icon" class="w-8 h-8" />
+          <img :src="mood.icon" alt="Mood Icon" class="w-6 h-6 sm:w-8 sm:h-8" />
         </div>
       </div>
       <!-- Etichetta -->
-      <p class="text-sm font-medium mt-2">{{ mood.label }}</p>
-      <p class="text-sm text-gray-500">{{ mood.value }}%</p>
+      <p class="text-xs sm:text-sm font-medium mt-2 text-center">{{ mood.label }}</p>
+      <p class="text-xs sm:text-sm text-gray-500 text-center">{{ mood.value }}%</p>
     </div>
   </div>
 </template>
+
 
 <script setup lang="ts">
 import { computed } from 'vue';

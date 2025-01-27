@@ -1,4 +1,3 @@
-// src/bookings/entities/booking.entity.ts
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { ObjectType, Field } from '@nestjs/graphql';
 import { Travel } from '../../travels/entities/travel.entities';
@@ -26,10 +25,6 @@ export class Booking {
   @Field(() => Date, { nullable: true })
   expiresAt: Date | null;
 
-  /*
-  @Field(() => Travel)
-  @ManyToOne(() => Travel, (travel) => travel.bookings)
-  travel: Travel;*/
 
   @ManyToOne(() => Travel, (travel) => travel.bookings, { eager: true })
   @JoinColumn({ name: 'travelId' })

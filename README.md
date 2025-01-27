@@ -12,9 +12,9 @@ This document explains how to set up and run the backend application built with 
 
 Before starting, ensure you have the following installed on your system:
 
-- **Node.js** (v16.x or later)
+- **Node.js** (v20.x or later)
 - **npm** (v8.x or later) or **yarn**
-- **PostgreSQL** (v12.x or later)
+- **PostgreSQL** (v14.x or later)
 - **Git**
 
 ## Steps to Set Up
@@ -23,10 +23,10 @@ Before starting, ensure you have the following installed on your system:
 
 ```bash
 # Clone the project repository
-git clone <repository-url>
+git clone https://github.com/elleVas/WeRoadTestProject.git
 
 # Navigate to the project directory
-cd <project-directory>
+cd backend/hiring-test-api
 ```
 
 ### 2. Install Dependencies
@@ -45,28 +45,35 @@ yarn install
 
 ### 3. Create Environment Files
 
-Create a `.env.development` file in the root directory with the following variables:
+Create a `.development.env` file in the root directory with the following variables:
 
 ```
 # Application settings
 PORT=3000
 
 # Database settings
+DB_TYPE=postgres
 DB_HOST=localhost
 DB_PORT=5432
 DB_USERNAME=<your_db_username>
 DB_PASSWORD=<your_db_password>
 DB_NAME=<your_db_name>
+#Port configuration
+PORT=<your_port> default 3000
+#cors enable for frontend (example)
+CORS_FRONTEND=http://localhost:3000 
+CORS_METHOD=GET,HEAD,PUT,PATCH,POST,DELETE
 ```
 
 Replace `<your_db_username>`, `<your_db_password>`, and `<your_db_name>` with your PostgreSQL credentials and database name.
+Replace `<your_port>`, with one port at your choice default 3000
 
 ### 4. Import the Database Dump
 
-The project includes a `DUMP.sql` file located in the root directory. Import it into your PostgreSQL database using the following command:
+The project includes a `dump.sql` file located in the root directory. Import it into your PostgreSQL database using the following command:
 
 ```bash
-psql -U <your_db_username> -d <your_db_name> -f DUMP.sql
+psql -U <your_db_username> -d <your_db_name> -f dump.sql
 ```
 
 Replace `<your_db_username>` and `<your_db_name>` with your database credentials and name.
@@ -85,7 +92,7 @@ or, if using Yarn:
 yarn start:dev
 ```
 
-The backend will start on the port defined in your `.env.development` file (default: `3000`).
+The backend will start on the port defined in your `.development.env` file (default: `3000`).
 
 ### 6. Verify the Application
 
