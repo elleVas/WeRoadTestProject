@@ -178,7 +178,7 @@ Before starting, ensure you have the following installed on your system:
 
 ```bash
 # Navigate to the project directory
-cd backend/hiring-test-api
+cd frontend
 ```
 
 ### 2. Install Dependencies
