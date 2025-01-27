@@ -3,6 +3,11 @@
 This document explains how to set up and run the  application WEROADTESTPROJECT.
 
 
+### 0. Clone the Repository
+```bash
+# Clone the project repository
+git clone https://github.com/elleVas/WeRoadTestProject.git
+```
 
 # Backend Setup Guide (NestJS)
 
@@ -19,12 +24,9 @@ Before starting, ensure you have the following installed on your system:
 
 ## Steps to Set Up
 
-### 1. Clone the Repository
+### 1. Navigate to the project directory
 
 ```bash
-# Clone the project repository
-git clone https://github.com/elleVas/WeRoadTestProject.git
-
 # Navigate to the project directory
 cd backend/hiring-test-api
 ```
@@ -61,7 +63,7 @@ DB_NAME=<your_db_name>
 #Port configuration
 PORT=<your_port> default 3000
 #cors enable for frontend (example)
-CORS_FRONTEND=http://localhost:3000 
+CORS_FRONTEND=http://localhost:<your_port>
 CORS_METHOD=GET,HEAD,PUT,PATCH,POST,DELETE
 ```
 
@@ -172,14 +174,11 @@ Before starting, ensure you have the following installed on your system:
 
 ## Steps to Set Up
 
-### 1. Clone the Repository
+### 1. Navigate to the project directory
 
 ```bash
-# Clone the project repository
-git clone <repository-url>
-
 # Navigate to the project directory
-cd <project-directory>
+cd backend/hiring-test-api
 ```
 
 ### 2. Install Dependencies
