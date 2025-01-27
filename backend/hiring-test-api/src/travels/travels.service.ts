@@ -1,6 +1,7 @@
 // src/travels/travels.service.ts
 import { Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { Repository, MoreThan, MoreThanOrEqual } from 'typeorm';
+
 import { InjectRepository } from '@nestjs/typeorm';
 import { Travel } from './entities/travel.entities';
 import { CreateTravelInput } from './dto/create-travel.input';
@@ -13,7 +14,16 @@ export class TravelsService {
   ) {}
 
   findAll() {
-    return this.travelRepository.find({ order: { startingDate: 'ASC' } });
+    const today = new Date();
+    return this.travelRepository.find({
+      where: {
+        maxCapacity: MoreThan(0),
+        startingDate: MoreThanOrEqual(today),
+      },
+      order: {
+        startingDate: 'ASC',
+      },
+    });
   }
 
   findOne(id: string) {

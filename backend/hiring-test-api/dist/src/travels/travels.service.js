@@ -22,7 +22,16 @@ let TravelsService = class TravelsService {
         this.travelRepository = travelRepository;
     }
     findAll() {
-        return this.travelRepository.find({ order: { startingDate: 'ASC' } });
+        const today = new Date();
+        return this.travelRepository.find({
+            where: {
+                maxCapacity: (0, typeorm_1.MoreThan)(0),
+                startingDate: (0, typeorm_1.MoreThanOrEqual)(today),
+            },
+            order: {
+                startingDate: 'ASC',
+            },
+        });
     }
     findOne(id) {
         return this.travelRepository.findOneBy({ id });
