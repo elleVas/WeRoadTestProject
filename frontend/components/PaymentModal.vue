@@ -92,6 +92,8 @@
             ></path>
           </svg>
         </div>
+        <span v-if="isTimeExpired" class="text-red-600 text-sm">Tempo scaduto, verrete reindirizzati alla home page</span>
+    
       </form>
 
       <button
@@ -166,6 +168,9 @@ const closeModal = (): void => {
 
 const handleTimeExpired = (): void => {
   isTimeExpired.value = true;
+  setTimeout(() => {
+    navigateTo("/");
+  }, 5000);
 };
 
 // Funzione per validare i campi di pagamento
