@@ -3,22 +3,12 @@ import { BookingsService } from './bookings.service';
 import { Booking } from './entities/booking.entities';
 import { CreateBookingInput } from './dto/create-booking.input';
 import { ConfirmBookingInput } from './dto/confirm-booking.input';
+import { DeleteBookingInput } from './dto/delete-booking.input';
 import { Travel } from 'src/travels/entities/travel.entities';
 
 @Resolver(() => Booking)
 export class BookingsResolver {
   constructor(private readonly bookingsService: BookingsService) {}
-
-  /*@Mutation(() => Booking)
-  async createBooking(
-    @Args('createBookingInput') createBookingInput: CreateBookingInput,
-  ): Promise<Booking> {
-    const { email, travelId, seats } = createBookingInput;
-    const booking = await this.bookingsService.create(email, travelId, seats);
-
-    // Restituisci l'intero oggetto booking (incluso travel completo)
-    return booking; 
-  }*/
 
   @Mutation(() => Booking)
   async createBooking(
@@ -28,7 +18,7 @@ export class BookingsResolver {
     const { email, travelId, seats } = createBookingInput;
     return await this.bookingsService.create(email, travelId, seats);
   }
-  // Questa è la parte importante
+
   @ResolveField(() => Travel)
   async travel(@Parent() booking: Booking): Promise<Travel> {
     // Usa `booking.travelId` per trovare l'entità Travel
@@ -42,5 +32,26 @@ export class BookingsResolver {
     const { id, fakeToken } = confirmBookingInput;
     return await this.bookingsService.confirmBookingWithPayment(id, fakeToken);
   }
+
+
+ /* @Mutation(() => Booking)
+  async cleanupExpiredBookings(
+    @Args('deleteBookingInput') deleteBookingInput: DeleteBookingInput,
+  ){
+     const { id } = deleteBookingInput;
+     await this.bookingsService.cleanupExpiredBookingsById(id);
+  }*/
+
+
+  @Mutation(() => Boolean)
+async cleanupExpiredBookings(
+  @Args('deleteBookingInput') deleteBookingInput: DeleteBookingInput,
+): Promise<boolean> {
+   const { id } = deleteBookingInput;
+   await this.bookingsService.cleanupExpiredBookingsById(id);
+   return true; // Se tutto va bene, restituisci true
+}
+
+
 }
 

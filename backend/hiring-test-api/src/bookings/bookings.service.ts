@@ -125,10 +125,35 @@ export class BookingsService {
     }
   }
 
-
-
-  @Cron(CronExpression.EVERY_5_MINUTES)
-  async cleanupExpiredBookingsTask() {
+    @Cron(CronExpression.EVERY_5_MINUTES)
+    async cleanupExpiredBookingsTask() {
     await this.cleanupExpiredBookings();
   }
+ 
+  
+  async cleanupExpiredBookingsById(id: string): Promise<boolean> {
+    // Trova la prenotazione scaduta e non confermata
+    const booking = await this.bookingRepository.findOne({
+      where: { id, isConfirmed: false },
+      relations: ['travel'],
+    });
+
+    if (!booking) {
+       return false; 
+    }
+
+    const travel = booking.travel;
+    if (travel) {
+       
+        travel.maxCapacity += booking.seats;
+        await this.travelRepository.save(travel);
+    }
+
+    await this.bookingRepository.remove(booking);
+    return true; 
+}
+
+
+
+
 }

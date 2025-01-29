@@ -108,7 +108,7 @@
 
 <script setup lang="ts">
 import { ref, watch, defineProps, defineEmits } from "vue";
-import { CONFIRM_BOOKING } from "@/plugins/graphql/mutations";
+import { CONFIRM_BOOKING, DELETE_BOOKING } from "@/plugins/graphql/mutations";
 
 const { $apollo } = useNuxtApp();
 
@@ -166,11 +166,28 @@ const closeModal = (): void => {
   emits("update:isOpenPayment", false);
 };
 
-const handleTimeExpired = (): void => {
+const handleTimeExpired = async (): Promise<void> => {
   isTimeExpired.value = true;
-  setTimeout(() => {
-    navigateTo("/");
-  }, 5000);
+    const deleteBookingInput = {
+    id: bookingID.value
+  };
+
+    try {
+    await $apollo.mutate({
+      mutation: DELETE_BOOKING,
+      variables: { deleteBookingInput },
+    });
+
+    dialogPayment.value = true;
+  } catch (error) {
+    console.error("Errore nella creazione delete prenotazione:", error);
+  } finally {
+    setTimeout(() => {
+      navigateTo("/");
+  }, 1000);
+  }
+
+
 };
 
 // Funzione per validare i campi di pagamento

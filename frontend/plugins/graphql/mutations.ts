@@ -31,3 +31,8 @@ export const CONFIRM_BOOKING = gql`
     }
   }
 `;
+
+export const DELETE_BOOKING = gql`
+mutation CleanupExpiredBookings($deleteBookingInput: DeleteBookingInput!) {
+  cleanupExpiredBookings(deleteBookingInput: $deleteBookingInput)
+}`;

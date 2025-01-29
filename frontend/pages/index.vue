@@ -3,7 +3,9 @@
     <h1 class="text-3xl font-bold text-center mb-6">
       WeRoad takes you to discover the world.
     </h1>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div v-if="pending" class="text-center text-gray-600">Loading...</div>
+    <div v-else-if="error" class="text-center text-red-500">Error loading travels.</div>
+    <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       <TravelCard
         v-for="travel in travels"
         :key="travel.id"
@@ -15,33 +17,25 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { useNuxtApp } from '#app';
+import { useAsyncData, useNuxtApp } from '#app';
 import { GET_TRAVELS } from '@/plugins/graphql/queries';
 import { Travel } from '../interfaces/interfaces';
 
-const travels = ref<Travel[]>([]);
+const { $apollo } = useNuxtApp();
+
+const { data: travels, pending, error } = useAsyncData('travels', async () => {
+  const { data } = await $apollo.query<{ travels: Travel[] }>({
+    query: GET_TRAVELS,
+    // Forza il recupero sempre dal server
+    fetchPolicy: 'network-only', 
+  });
+  return data.travels;
+});
 
 // Funzione per gestire l'evento di prenotazione
 const goToCheckout = (travel: Travel): void => {
   console.log('Prenotazione per il viaggio:', travel);
-  
 };
-
-onMounted(async () => {
-  const { $apollo } = useNuxtApp();
-  if ($apollo) {
-    try {
-      const { data } = await $apollo.query<{ travels: Travel[] }>({
-        query: GET_TRAVELS,
-      });
-      travels.value = data.travels;
-    } catch (error) {
-      console.error('Errore nella query di viaggi:', error);
-    }
-  } else {
-    console.error('$apollo non è definito!');
-  }
-});
 </script>
+
 
