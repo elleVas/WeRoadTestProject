@@ -1,7 +1,7 @@
 // src/bookings/bookings.service.ts
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { LessThanOrEqual, Repository } from 'typeorm';
+import { DataSource, LessThanOrEqual, Repository } from 'typeorm';
 import { Booking } from './entities/booking.entities';
 import { Travel } from '../travels/entities/travel.entities';
 import { Cron, CronExpression } from '@nestjs/schedule';
@@ -9,59 +9,79 @@ import { PaymentsService } from '../payments/payments.service';
 
 @Injectable()
 export class BookingsService {
+
   constructor(
     @InjectRepository(Booking)
     private readonly bookingRepository: Repository<Booking>,
     private readonly paymentsService: PaymentsService,
     @InjectRepository(Travel)
     private readonly travelRepository: Repository<Travel>,
+    private readonly dataSource: DataSource,
   ) {}
 
   async create(email: string, travelId: string, seats: number) {
-    // Recupera il viaggio
-    const travel = await this.travelRepository.findOneBy({ id: travelId });
-    if (!travel) {
-      throw new Error('Travel not found');
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      // Recupera il viaggio con il blocco ottimista
+      const travel = await queryRunner.manager.findOne(Travel, {
+        where: { id: travelId },
+      });
+      if (!travel) {
+        throw new Error('Travel not found');
+      }
+
+      // Trova le prenotazioni attive per quel viaggio
+      const activeBookings = await queryRunner.manager.find(Booking, {
+        where: { travel: { id: travelId }, isConfirmed: false },
+      });
+
+      // Calcola i posti già prenotati
+      const reservedSeats = activeBookings.reduce(
+        (sum, booking) => sum + booking.seats,
+        0,
+      );
+
+      // Verifica se ci sono posti sufficienti disponibili
+      if (seats > travel.maxCapacity - reservedSeats) {
+        throw new Error('Not enough available seats');
+      }
+
+      // Sottrae i posti prenotati dalla disponibilità di posti
+      travel.maxCapacity -= seats;
+
+      // Aggiorna la capacità disponibile
+      await queryRunner.manager.save(travel);
+
+      // Imposta la data di scadenza della prenotazione
+      const expiresAt = new Date();
+      expiresAt.setMinutes(expiresAt.getMinutes() + 15);
+
+      // Crea la prenotazione
+      const booking = queryRunner.manager.create(Booking, {
+        email,
+        seats,
+        expiresAt,
+        travel,
+      });
+
+      // Salva la prenotazione
+      await queryRunner.manager.save(booking);
+
+      // Commit della transazione
+      await queryRunner.commitTransaction();
+      return booking;
+    } catch (error) {
+      // Rollback in caso di errore
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      // Rilascio del queryRunner
+      await queryRunner.release();
     }
-
-    // Trova le prenotazioni attive per quel viaggio
-    const activeBookings = await this.bookingRepository.find({
-      where: { travel: { id: travelId }, isConfirmed: false },
-      relations: ['travel'],
-    });
-
-    // Calcola i posti già prenotati
-    const reservedSeats = activeBookings.reduce(
-      (sum, booking) => sum + booking.seats,
-      0,
-    );
-
-    // Verifica se ci sono posti sufficienti disponibili
-    if (seats > travel.maxCapacity) {
-      throw new Error('Not enough available seats');
-    }
-
-    // Sottrae i posti prenotati dalla disponibilità di posti
-    travel.maxCapacity -= seats;
-
-    // Salva l'aggiornamento del viaggio per i posti disponibili si ferma a 0
-    if (travel.maxCapacity >= 0) {
-      await this.travelRepository.save(travel);
-    }
-    // Imposta la data di scadenza della prenotazione
-    const expiresAt = new Date();
-    expiresAt.setMinutes(expiresAt.getMinutes() + 15);
-
-    // Crea la prenotazione
-    const booking = this.bookingRepository.create({
-      email,
-      seats,
-      expiresAt,
-      travel,
-    });
-
-    // Salva la prenotazione
-    return await this.bookingRepository.save(booking);
   }
 
   async findTravelById(travelData: Travel): Promise<Travel> {
@@ -125,12 +145,11 @@ export class BookingsService {
     }
   }
 
-    @Cron(CronExpression.EVERY_5_MINUTES)
-    async cleanupExpiredBookingsTask() {
+  @Cron(CronExpression.EVERY_5_MINUTES)
+  async cleanupExpiredBookingsTask() {
     await this.cleanupExpiredBookings();
   }
- 
-  
+
   async cleanupExpiredBookingsById(id: string): Promise<boolean> {
     // Trova la prenotazione scaduta e non confermata
     const booking = await this.bookingRepository.findOne({
@@ -139,21 +158,16 @@ export class BookingsService {
     });
 
     if (!booking) {
-       return false; 
+      return false;
     }
 
     const travel = booking.travel;
     if (travel) {
-       
-        travel.maxCapacity += booking.seats;
-        await this.travelRepository.save(travel);
+      travel.maxCapacity += booking.seats;
+      await this.travelRepository.save(travel);
     }
 
     await this.bookingRepository.remove(booking);
-    return true; 
-}
-
-
-
-
+    return true;
+  }
 }
