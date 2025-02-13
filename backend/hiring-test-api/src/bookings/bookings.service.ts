@@ -9,7 +9,6 @@ import { PaymentsService } from '../payments/payments.service';
 
 @Injectable()
 export class BookingsService {
-
   constructor(
     @InjectRepository(Booking)
     private readonly bookingRepository: Repository<Booking>,
